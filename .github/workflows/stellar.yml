@@ -64,11 +64,15 @@ jobs:
             echo "::endgroup::"
           done
 
-      - name: Check Soroban Wasm target (not a deployable CLI build)
+      - name: Install Stellar CLI v28.1.0 (required for Soroban SDK 29)
+        uses: stellar/stellar-cli@v28.1.0
+
+      - name: Build Soroban Wasm using Stellar CLI (no deployment)
         run: |
           set -euo pipefail
+          stellar --version
           for pkg in soroban soroban/oracle soroban/rate-model soroban/rwa soroban/market soroban/rwa-factory soroban/lens; do
-            echo "::group::Wasm target $pkg"
-            cargo check --release --target wasm32v1-none --manifest-path "$pkg/Cargo.toml"
+            echo "::group::Stellar contract build $pkg"
+            stellar contract build --manifest-path "$pkg/Cargo.toml"
             echo "::endgroup::"
           done

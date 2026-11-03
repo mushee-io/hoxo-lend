@@ -5,12 +5,15 @@
   "horizonUrl": "https://horizon-testnet.stellar.org",
   "explorer": "https://stellar.expert/explorer/testnet",
   "contracts": {
-    "vault": null,
+    "vault": "CCK4K5W7BVLSKSXU6R6X6RHVN5P66RCC47IORRKANDRQUEKAKLNUFOXW",
     "pool": null,
-    "oracle": null,
+    "market": "CBK7NL2TDYERVYFM4XFZIP7MOPTLV2KDAAV4A4OHQO7WGU5I5DNZ5U66",
+    "oracle": "CB77K2WBZDAFYVRRC7TWNJX73BY6IBIKZVXCC7TAJO647L275PAIUSZN",
     "riskEngine": null,
-    "interestRateModel": null,
-    "rwaVaultFactory": null
+    "interestRateModel": "CCRXJN7GADULCTF5XSQYHNG56NSGEGH2OSJLHJJXNIQWUTWK76S3SY74",
+    "rwaVaultFactory": "CDVO27EMF6U5NUVKLYDGA26MBLONEKJ3II6MNST3IWMBKYHHMEAT6PDP",
+    "rwaVault": "CBXSTRUKRFJ4CCCIOHLP2IPVR3HK7RXZBIVKNYSPEBX5EH3F5AEVRZOC",
+    "lens": "CDO5JVFN5PY6IXJMBYWWH3W4D3IJN5SZODPQCXGQJ6OCIHJZU3P72GN3"
   },
   "plannedMarkets": [
     {
@@ -32,8 +35,20 @@
     }
   ],
   "supportedAssets": [],
-  "deploymentStatus": "not-deployed",
+  "deploymentStatus": "deployed-paused",
   "tradingEnabled": false,
   "lendingEnabled": false,
-  "disclaimer": "Planned XLM/USDC listings are not active; no Hoxo Lend contracts, yields, balances, deposits or borrowing have been verified."
+  "disclaimer": "Real Soroban contracts deployed on Stellar Testnet, PAUSED and UNAUDITED. HXTEST is a throwaway Testnet asset, not USDC. Public deposits and borrowing are disabled.",
+  "deploymentEvidence": {
+    "network": "Stellar Testnet",
+    "verifiedAt": "2026-11-03T18:19:07.767920+00:00",
+    "runUrl": "https://github.com/mushee-io/hoxo-lend/actions/runs/41691876395",
+    "deployer": "GBKYFJAXNBIKYNS564KI2BI4BN2WMRJF55OZDIBWWC6CNCPGJ4WPZH6L",
+    "adminPublicKey": "GBKYFJAXNBIKYNS564KI2BI4BN2WMRJF55OZDIBWWC6CNCPGJ4WPZH6L",
+    "ephemeralAdmin": true,
+    "allContractsPaused": true,
+    "xlmSac": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+    "hxTestSac": "CCMFO7ELH4NCNSBHLMAIY3BT233K3JIGVALPMDEX5SZCYRYEELWXCQ4C",
+    "hxTestIssuer": "GBKYFJAXNBIKYNS564KI2BI4BN2WMRJF55OZDIBWWC6CNCPGJ4WPZH6L"
+  }
 }

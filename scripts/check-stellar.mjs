@@ -1,34 +1,44 @@
-import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 
-const config = JSON.parse(readFileSync('config/stellar-testnet.json', 'utf8'));
-assert.equal(config.network, 'Stellar Testnet');
-assert.equal(config.passphrase, 'Test SDF Network ; September 2015');
-assert.equal(config.deploymentStatus, 'not-deployed');
-assert.equal(config.lendingEnabled, false);
-assert.equal(config.tradingEnabled, false);
-assert.equal(config.contracts.vault, null);
-assert.equal(config.contracts.pool, null);
-assert.deepEqual(config.supportedAssets, []);
-assert.deepEqual(config.plannedMarkets.map(m => m.symbol), ['XLM','USDC']);
-assert.ok(config.plannedMarkets.every(m => !m.active && !m.marketContractId && !m.sacContractId));
+const cfg = JSON.parse(readFileSync("config/stellar-testnet.json","utf8"));
+assert.equal(cfg.network, "Stellar Testnet");
+assert.equal(cfg.passphrase, "Test SDF Network ; September 2015");
+assert.equal(cfg.lendingEnabled, false, "Do not turn on unaudited lending");
+assert.equal(cfg.tradingEnabled, false);
+assert.deepEqual(cfg.supportedAssets, []);
+assert.ok(["not-deployed","deployed-paused"].includes(cfg.deploymentStatus));
 
-const pages = [
-  'app/index.html','app/markets/index.html','app/markets/xlm/index.html',
-  'app/markets/usdc/index.html','app/borrow/index.html','app/liquidations/index.html',
-  'app/rwa/index.html','app/portfolio/index.html','app/protocol/index.html',
-  'app/readiness/index.html','app/lab/index.html'
-];
-for (const file of [...pages, 'index.html', 'src/stellar.js']) {
-  const content = readFileSync(file, 'utf8');
-  assert.doesNotMatch(content,/bitkub|WtKUB|KUB Testnet|25925|eth_sendTransaction|window\.ethereum|mUSDT|mUSDC|0x[a-fA-F0-9]{40}/i,file);
+const id = /^C[A-Z2-7]{55}$/;
+if (cfg.deploymentStatus === "not-deployed") {
+  assert.ok(Object.values(cfg.contracts).every(x => x === null));
+} else {
+  for (const key of ["vault","market","oracle","interestRateModel",
+                      "rwaVaultFactory","rwaVault","lens"]) {
+    assert.ok(id.test(cfg.contracts[key]), key + " requires a real contract ID");
+  }
+  assert.equal(cfg.deploymentEvidence?.network,"Stellar Testnet");
+  assert.equal(cfg.deploymentEvidence?.allContractsPaused,true);
+  assert.match(cfg.deploymentEvidence?.runUrl || "",
+    /^https:\/\/github\.com\/mushee-io\/hoxo-lend\/actions\/runs\/\d+$/);
 }
-for (const file of pages) {
-  const content=readFileSync(file,'utf8');
-  assert.match(content,/Stellar Testnet/i,file);
-  assert.match(content,/not deployed|not live/i,file);
-  assert.doesNotMatch(content,/\$2(?:\.00)?M|2000000|\$2,000,000/i,file);
+assert.deepEqual(cfg.plannedMarkets.map(x => x.symbol), ["XLM","USDC"]);
+assert.ok(cfg.plannedMarkets.every(x => !x.active && !x.marketContractId && !x.sacContractId));
+
+const pages=["app/index.html","app/markets/index.html","app/markets/xlm/index.html",
+  "app/markets/usdc/index.html","app/borrow/index.html","app/liquidations/index.html",
+  "app/rwa/index.html","app/portfolio/index.html","app/protocol/index.html",
+  "app/readiness/index.html","app/lab/index.html"];
+for (const page of pages) {
+  const content = readFileSync(page,"utf8");
+  assert.match(content,/Stellar Testnet/i,page);
+  assert.match(content,/not deployed|not live|paused/i,page);
+  assert.match(content,/\/src\/stellar\.js/i,page);
+  assert.doesNotMatch(content,/\$2(?:\.00)?M|2000000|\$2,000,000/i,page);
 }
-assert.match(readFileSync('app/markets/index.html','utf8'),/XLM/);
-assert.match(readFileSync('app/markets/index.html','utf8'),/USDC/);
-console.log('Hoxo Lend Stellar-only routes, asset targets and fail-closed deployment checks passed.');
+for (const page of [...pages,"index.html","src/stellar.js"]) {
+  const content=readFileSync(page,"utf8");
+  assert.doesNotMatch(content,
+    /bitkub|WtKUB|KUB Testnet|25925|eth_sendTransaction|window\.ethereum|mUSDT|mUSDC|0x[a-fA-F0-9]{40}/i,page);
+}
+console.log("Hoxo Lend Stellar-only Testnet deployment registry checks passed.");

@@ -1,0 +1,66 @@
+name: Deploy Hoxo Lend to Stellar Testnet (PAUSED)
+
+on:
+  push:
+    branches: [feature/testnet-contract-activation]
+    paths:
+      - .github/workflows/testnet-deploy.yml
+      - scripts/testnet-deploy.sh
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: hoxo-lend-testnet-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.repository == 'mushee-io/hoxo-lend' && github.ref == 'refs/heads/feature/testnet-contract-activation'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      CARGO_TARGET_DIR: /tmp/hoxo-target
+      CARGO_BUILD_JOBS: "2"
+      HOXO_TESTNET_ADMIN_PUBLIC_KEY: ${{secrets.HOXO_TESTNET_ADMIN_PUBLIC_KEY}}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+          targets: wasm32v1-none
+      - uses: stellar/stellar-cli@v28.1.0
+      - name: Verify and build every Soroban contract
+        run: |
+          set -euo pipefail
+          node scripts/check-stellar.mjs
+          for crate in soroban soroban/oracle soroban/rate-model soroban/market soroban/rwa soroban/rwa-factory soroban/lens; do
+            cargo fmt --manifest-path "$crate/Cargo.toml" --check
+            cargo test --manifest-path "$crate/Cargo.toml" --quiet
+            stellar contract build --manifest-path "$crate/Cargo.toml"
+          done
+      - name: Deploy all seven contracts, verify state, leave paused
+        id: deploy
+        shell: bash
+        run: bash scripts/testnet-deploy.sh
+      - name: Publish deployment evidence even if incomplete
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hoxo-lend-testnet-deployment
+          path: out/testnet/
+          retention-days: 90
+          if-no-files-found: warn
+      - name: Register successful on-chain deployment
+        if: steps.deploy.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add config/stellar-testnet.json
+          git commit -m "Register verified paused Stellar Testnet deployments [skip ci]"
+          git push origin HEAD:feature/testnet-contract-activation

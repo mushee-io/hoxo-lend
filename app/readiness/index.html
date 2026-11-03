@@ -5,18 +5,18 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' https://soroban-testnet.stellar.org; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests">
 <title>Readiness — Hoxo Lend</title><link rel="stylesheet" href="/src/stellar.css"></head>
 <body data-stellar-page="readiness">
-<div class="topline">STELLAR TESTNET · SOROBAN · MARKETS NOT DEPLOYED · NO LIVE LENDING</div>
+<div class="topline">STELLAR TESTNET · SOROBAN · CONTRACTS DEPLOYED & PAUSED · NO LIVE LENDING</div>
 <header><a class="brand" href="/" aria-label="Hoxo Lend home"><span class="brandmark" aria-hidden="true"></span>Hoxo Lend</a>
 <nav aria-label="Application"><a href="/app/">Dashboard</a><a href="/app/markets/">Markets</a><a href="/app/borrow/">Borrow</a><a href="/app/liquidations/">Liquidations</a><a href="/app/rwa/">RWA</a><a href="/app/portfolio/">Portfolio</a><a href="/app/protocol/">Protocol</a><a href="/app/readiness/" aria-current="page">Readiness</a><a href="/docs/">Docs</a></nav></header>
 <main class="shell"><section class="app-hero"><div class="eyebrow">HOXO LEND · STELLAR TESTNET</div><h1>Readiness</h1><p>Engineering, chain verification and audit gates must be passed before Hoxo Lend accepts public deposits.</p></section>
-<div class="preview-warning"><strong>Development preview — not deployed.</strong> No verified Hoxo Lend lending pools, deposits, yields, or user positions exist in the active registry. This is not a live money market.</div>
+<div class="preview-warning"><strong>Stellar Testnet contracts deployed — paused.</strong> Seven on-chain Soroban contracts are recorded and paused. No public lending pools, deposits, yields or user positions are live.</div>
 
 <section class="panel app-section"><h2>Launch checklist</h2><ul class="gate-list">
 <li><span>✓</span><div><strong>Independent Stellar-only codebase</strong><p>Original Maddeth is archived and unmodified.</p></div></li>
 <li><span>✓</span><div><strong>Read-only Stellar dashboard</strong><p>No KUB deployment, balances or fabricated metrics.</p></div></li>
 <li><span>○</span><div><strong>Native market, oracle and risk engine</strong><p>Complete integrated Soroban accounting, unit/fuzz and property tests.</p></div></li>
-<li><span>○</span><div><strong>Stellar Testnet deployment evidence</strong><p>Verified contract IDs, asset issuers and transaction receipts.</p></div></li>
+<li><span>✓</span><div><strong>Stellar Testnet deployment evidence</strong><p>Verified contract IDs and deployment receipts (3 November). Public asset issuers and wallet-signed lending transactions remain outstanding.</p></div></li>
 <li><span>○</span><div><strong>Freighter wallet signing</strong><p>Simulation, preflight, authorization and confirmed transactions.</p></div></li>
 <li><span>○</span><div><strong>Independent security review and launch approval</strong><p>No public deposits or borrowing before sign-off.</p></div></li></ul>
 <p class="muted">An RPC health-check only proves a network endpoint responds; it is not evidence of lending liquidity or deployed contracts.</p></section></main><footer><div><strong>Hoxo Lend</strong><p>Stellar-only development · Not audited · No public deposits</p></div><div><a href="/docs/">Documentation</a> · <a href="https://github.com/mushee-io/hoxo-lend" target="_blank" rel="noopener noreferrer">GitHub</a></div></footer>
-</body></html>
+<script src="/src/stellar.js" defer></script></body></html>

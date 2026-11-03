@@ -27,6 +27,7 @@ jobs:
         run: |
           set -euo pipefail
           node --check src/tx-live.js
+          bash -n scripts/activate-testnet-vault.sh
           npm install --no-audit --no-fund
           npm run test:frontend
           npm run build

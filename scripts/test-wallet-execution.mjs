@@ -14,6 +14,16 @@ assert.match(source,/sendTransaction/);
 assert.match(source,/getTransaction/);
 assert.match(source,/paused/);
 assert.match(source,/i128/);
+for(const method of ["deposit_collateral","withdraw_collateral","borrow","repay_for","supply","withdraw_supply","submitPrice","ownerControl","addUsdcTrustline"]){
+ assert.ok(source.includes(method),"Missing signed Testnet operation: "+method);
+}
+const deploy=readFileSync("scripts/activate-testnet-vault.sh","utf8");
+assert.match(deploy,/CIRCLE_USDC_ISSUER/);
+assert.match(deploy,/USDC_SAC/);
+assert.match(deploy,/MARKET=/);
+assert.match(deploy,/ORACLE=/);
+assert.match(deploy,/ADMIN=/);
+assert.match(deploy,/marketDeployedPaused/);
 assert.doesNotMatch(source,/fromSecret|Keypair\.fromSecret|localStorage|sessionStorage|eval\s*\(/);
 for(const path of ["app/supply/index.html","app/borrow/index.html","app/protocol/index.html","app/settings/index.html"]){
  const page=readFileSync(path,"utf8");

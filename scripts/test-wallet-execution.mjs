@@ -13,6 +13,13 @@ assert.match(source,/prepareTransaction/);
 assert.match(source,/sendTransaction/);
 assert.match(source,/getTransaction/);
 assert.match(source,/paused/);
+assert.match(source,/async function simulateRead\(/);
+assert.match(source,/const publicSource=registry\?\.cfg\?\.activation\?\.adminPublicKey/);
+assert.match(source,/async function readFreshQuote\(/);
+assert.match(source,/readFreshQuote\(pilot\.usdcSac\)/);
+assert.match(source,/readFreshQuote\(pilot\.xlmSac\)/);
+assert.match(source,/Market remains paused: publish fresh owner-signed/);
+assert.match(source,/hoxo-pilot-market-state/);
 assert.match(source,/i128/);
 for(const method of ["deposit_collateral","withdraw_collateral","borrow","repay_for","supply","withdraw_supply","submitPrice","ownerControl","addUsdcTrustline"]){
  assert.ok(source.includes(method),"Missing signed Testnet operation: "+method);
@@ -32,5 +39,9 @@ for(const path of ["app/supply/index.html","app/borrow/index.html","app/protocol
 for(const path of ["app/supply/index.html","app/borrow/index.html","app/protocol/index.html","app/settings/index.html"]){
  const page=readFileSync(path,"utf8");
  assert.ok(page.includes("https://soroban-testnet.stellar.org https://horizon-testnet.stellar.org"),path+": allow both Soroban and Horizon Testnet endpoints");
+}
+const protocolPage=readFileSync("app/protocol/index.html","utf8");
+for(const id of ["hoxo-pilot-vault-state","hoxo-pilot-oracle-state","hoxo-pilot-usdc-state","hoxo-pilot-xlm-state","hoxo-pilot-market-state","hoxo-refresh-state"]){
+ assert.ok(protocolPage.includes('id="'+id+'"'),"Missing live pilot state: "+id);
 }
 console.log("Wallet authorization, honest Testnet state, signed transaction and verified receipt checks are wired.");

@@ -1,5 +1,5 @@
-/* Hoxo Lend V2 — Stellar Testnet read-only UI controls and Freighter connection.
-   There is NO transaction signing or submission on the deployed-paused protocol. */
+/* Hoxo Lend V2 — status, navigation, and Freighter public-account controls.
+   Financial actions for the separately deployed Testnet pilot live in tx-live.js. */
 (() => {
   "use strict";
   const NETWORK_PASSPHRASE = "Test SDF Network ; September 2015";
@@ -75,29 +75,10 @@
       : verified ? "Seven older contract IDs verified in registry" : "Verification pending");
     safeText("[data-deployment-count]", verified ? "07" : "—");
     safeText("[data-release-status]", ownedPilot
-      ? "Owned Testnet pilot deployed · Freighter administrator signatures required"
+      ? "Owner-controlled Testnet pilot registered · Check live contract state"
       : verified ? "Legacy contracts deployed · Operations paused" : "Deployment verification unavailable");
 
-    if (ownedPilot) {
-      const banner = $(".readiness-banner > div");
-      if (banner) {
-        const heading = document.createElement("strong");
-        heading.textContent = "New owner-controlled Stellar Testnet pilot deployed.";
-        const supply = document.createElement("a");
-        supply.href = "/app/supply/";
-        supply.textContent = "Activate XLM vault in Freighter ↗";
-        const protocol = document.createElement("a");
-        protocol.href = "/app/protocol/";
-        protocol.textContent = "Activate the oracle and market ↗";
-        banner.replaceChildren(
-          heading,
-          document.createTextNode(" The XLM vault and Circle USDC/XLM market now have a permanent administrator, but wallet-signed activation and valid oracle quotes are still required. The original seven proof contracts remain paused. "),
-          supply,
-          document.createTextNode(" · "),
-          protocol
-        );
-      }
-    }
+
   }
 
   function renderMetrics() {

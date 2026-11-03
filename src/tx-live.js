@@ -89,17 +89,34 @@ async function readWallet({request=false}={}){
   sourceAccount=publicKey;
   return publicKey;
 }
-async function readPaused(contractId){
+// Read-only contract inspection uses the registered public Testnet admin address
+// as the simulation source. No wallet connection or signing is necessary.
+async function simulateRead(contractId,method,args=[]){
   if(!C.test(contractId||""))fail("Unverified Soroban contract ID.");
-  const wallet=await readWallet();
-  const account=await rpcServer.getAccount(wallet);
+  const publicSource=registry?.cfg?.activation?.adminPublicKey;
+  if(!G.test(publicSource||""))fail("Verified pilot administrator address is missing.");
+  const account=await rpcServer.getAccount(publicSource);
   const tx=new TransactionBuilder(account,{fee:BASE_FEE,networkPassphrase:Networks.TESTNET})
-    .addOperation(new Contract(contractId).call("paused")).setTimeout(50).build();
+    .addOperation(new Contract(contractId).call(method,...args)).setTimeout(50).build();
   const sim=await rpcServer.simulateTransaction(tx);
-  if(sim.error||!sim.result?.retval)fail("Cannot read the on-chain paused flag.");
-  const value=scValToNative(sim.result.retval);
+  if(sim.error||!sim.result?.retval)fail("Could not read "+method+" from contract "+contractId+".");
+  return scValToNative(sim.result.retval);
+}
+async function readPaused(contractId){
+  const value=await simulateRead(contractId,"paused");
   if(typeof value!=="boolean")fail("Unexpected paused state returned by Soroban.");
   return value;
+}
+// The oracle contract enforces positive prices and a strict age check.
+async function readFreshQuote(assetId){
+  const pilot=registry?.cfg?.activation;
+  if(!C.test(pilot?.oracleContractId||"")||!C.test(assetId||""))
+    fail("Oracle or asset registry is unverified.");
+  const quote=await simulateRead(pilot.oracleContractId,"read_fresh",[
+    new Address(assetId).toScVal(),nativeToScVal(1800n,{type:"u64"})
+  ]);
+  if(!quote||typeof quote!=="object")fail("Invalid Testnet oracle response.");
+  return quote;
 }
 function ensurePilot(mode,contractId){
   if(!registry?.pilot)fail("The verified team-controlled Testnet pilot has not been deployed.");
@@ -252,24 +269,57 @@ async function readSupplyAccount(){
   return {wallet,balance};
 }
 async function refreshButtons(){
-  const disabled=!(registry?.pilot && registry.cfg.activation?.vaultOperationsEnabled);
+  const pilot=registry?.cfg?.activation;
+  const enabled=Boolean(registry?.pilot && pilot?.vaultOperationsEnabled);
   const walletAction=byId("hoxo-vault-activate");
-  if(walletAction)walletAction.hidden=disabled;
+  if(walletAction)walletAction.hidden=!enabled;
   const note=byId("hoxo-live-status");
-  if(!note)return;
-  if(disabled){
-    note.textContent="A new vault with your Freighter wallet as administrator is required before live Testnet transactions.";
+  const put=(id,value)=>{const el=byId(id);if(el)el.textContent=value;};
+  if(!enabled){
+    if(note)note.textContent="Owner-controlled Testnet pilot is not verified in the deployment registry.";
     return;
   }
   try{
-    const paused=await readPaused(registry.cfg.activation.vaultContractId);
-    note.textContent=paused
-      ?"New Testnet vault deployed. Administrator must approve activation in Freighter."
-      :"Live Testnet vault is accepting wallet-signed XLM deposits and withdrawals.";
+    const vaultPaused=await readPaused(pilot.vaultContractId);
+    put("hoxo-pilot-vault-state",vaultPaused?"PAUSED · ADMIN ACTION":"UNPAUSED · TESTNET");
+    if(walletAction)walletAction.hidden=!vaultPaused;
     const indicator=byId("vault-live-badge");
-    if(indicator)indicator.textContent=paused?"READY FOR ADMIN SIGNATURE":"LIVE TESTNET · ON-CHAIN";
-    await readSupplyAccount();
-  }catch(error){note.textContent="Wallet/network checks pending: "+error.message;}
+    if(indicator)indicator.textContent=vaultPaused?"ADMIN SIGNATURE REQUIRED":"UNPAUSED · TESTNET";
+    if(note)note.textContent=vaultPaused
+      ?"Owner-controlled XLM vault deployed; administrator activation is available in Freighter."
+      :"XLM vault is unpaused on Stellar Testnet. Supply or withdraw only after reviewing the wallet transaction.";
+
+    if(byId("hoxo-pilot-market-state")){
+      const oraclePaused=await readPaused(pilot.oracleContractId);
+      const marketPaused=await readPaused(pilot.marketContractId);
+      put("hoxo-pilot-oracle-state",oraclePaused?"PAUSED":"UNPAUSED");
+      put("hoxo-pilot-market-state",marketPaused?"PAUSED":"UNPAUSED");
+      let freshUsdc=false,freshXlm=false;
+      if(!oraclePaused){
+        try{await readFreshQuote(pilot.usdcSac);freshUsdc=true;}catch{}
+        try{await readFreshQuote(pilot.xlmSac);freshXlm=true;}catch{}
+      }
+      put("hoxo-pilot-usdc-state",freshUsdc?"FRESH · TESTNET":"MISSING / EXPIRED");
+      put("hoxo-pilot-xlm-state",freshXlm?"FRESH · TESTNET":"MISSING / EXPIRED");
+      if(note)note.textContent=marketPaused
+        ? "The Testnet market requires fresh oracle quotes and an administrator-signed unpause."
+        : freshUsdc&&freshXlm
+          ? "Capped Circle USDC/XLM Testnet market is unpaused with fresh manual oracle quotes."
+          : "Market is unpaused, but quotes are missing or expired. New borrowing is blocked by on-chain freshness checks.";
+    }
+    // Wallet balances are optional account-specific information, not a
+    // prerequisite for inspecting publicly readable contract status.
+    if(byId("wallet-live-balance")){
+      try{await readSupplyAccount();}catch{
+        put("wallet-live-balance","Connect Freighter on Testnet to view your own XLM balance.");
+      }
+    }
+  }catch(error){
+    if(note)note.textContent="Could not verify current on-chain pilot state: "+error.message;
+    put("hoxo-pilot-vault-state","UNVERIFIED");
+    put("hoxo-pilot-oracle-state","UNVERIFIED");
+    put("hoxo-pilot-market-state","UNVERIFIED");
+  }
 }
 
 async function ownerControl(kind){
@@ -284,6 +334,14 @@ async function ownerControl(kind){
   if(kind==="market"){
     if(await readPaused(pilot.oracleContractId))
       fail("First activate the oracle and submit current Testnet XLM and USDC prices.");
+    // Do not unpause a borrowing market with absent or expired oracle quotes.
+    // These are real, positive, on-chain values updated within 30 minutes.
+    try{
+      await readFreshQuote(pilot.usdcSac);
+      await readFreshQuote(pilot.xlmSac);
+    }catch{
+      fail("Market remains paused: publish fresh owner-signed USDC/USD and XLM/USD Testnet oracle quotes first.");
+    }
     if(!window.confirm("TESTNET ONLY: This deploys a manually administered oracle, not an independently audited price feed. You must provide current values and refresh them at least every 30 minutes for new borrowing. Unpause testnet lending?"))return;
   }
   const method="set_paused";
@@ -314,12 +372,13 @@ async function submitPrice(token){
     "Manual price feed: "+token+" = $"+value+
     ". This is user-entered TESTNET pricing, not a verified independent oracle. "+
     "Do you confirm the USD value is based on a recent independently checked source?"))return;
-  await submitExactTx({
+  const receipt=await submitExactTx({
     contractId:pilot.oracleContractId,method:"submit",
     args:[new Address(admin).toScVal(),new Address(tokenAddress).toScVal(),nativeToScVal(price,{type:"i128"})],
     amount:value+" USD per "+token,
     description:"Publish owner-signed manual TESTNET "+token+" oracle quote"
   });
+  if(receipt)await refreshButtons();
 }
 async function addUsdcTrustline(){
   if(pending)fail("Another transaction is pending.");

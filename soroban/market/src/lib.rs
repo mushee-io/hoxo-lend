@@ -869,7 +869,9 @@ mod tests {
             let quote = Self::read(env.clone(), asset);
             let now = env.ledger().timestamp();
             let paused: bool = env.storage().instance().get(&4u32).unwrap_or(false);
-            if paused || max_age_seconds == 0 || quote.updated_at > now
+            if paused
+                || max_age_seconds == 0
+                || quote.updated_at > now
                 || now - quote.updated_at > max_age_seconds
             {
                 panic_with_error!(&env, MarketError::OracleStale);

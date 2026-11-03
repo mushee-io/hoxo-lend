@@ -14,7 +14,7 @@
  * point to a team-administered pilot before this module can enable writes.
  */
 import {
-  Address, BASE_FEE, Contract, Horizon, Networks,
+  Address, Asset, BASE_FEE, Contract, Horizon, Networks, Operation,
   TransactionBuilder, nativeToScVal, rpc, scValToNative
 } from "@stellar/stellar-sdk";
 import { getAddress, getNetwork, requestAccess, signTransaction } from "@stellar/freighter-api";
@@ -218,7 +218,7 @@ async function signAction(mode,method,amountInput){
   if(method==="repay_for")args=[new Address(wallet).toScVal(),new Address(wallet).toScVal(),nativeToScVal(amount,{type:"i128"})];
   else args=[new Address(wallet).toScVal(),nativeToScVal(amount,{type:"i128"})];
   return submitExactTx({
-    contractId,method,args,amount:amountInput+" XLM",
+    contractId,method,args,amount:amountInput+(method.includes("collateral")?" USDC":" XLM"),
     description:mode==="vault"?"XLM custody vault "+method:"Lending market "+method
   });
 }
@@ -271,6 +271,90 @@ async function refreshButtons(){
     await readSupplyAccount();
   }catch(error){note.textContent="Wallet/network checks pending: "+error.message;}
 }
+
+async function ownerControl(kind){
+  if(!registry)await readRegistry();
+  if(!registry.pilot)fail("The new owner-operated market is not registered.");
+  const pilot=registry.cfg.activation;
+  const admin=await readWallet({request:true});
+  if(admin!==pilot.adminPublicKey)fail("Use the owner Freighter account recorded in the Testnet deployment.");
+  const contractId=kind==="oracle"?pilot.oracleContractId:pilot.marketContractId;
+  if(!C.test(contractId||""))fail("No verified "+kind+" contract to activate.");
+  if(!await readPaused(contractId)){status(kind+" is already unpaused on Stellar Testnet.");return;}
+  if(kind==="market"){
+    if(await readPaused(pilot.oracleContractId))
+      fail("First activate the oracle and submit current Testnet XLM and USDC prices.");
+    if(!window.confirm("TESTNET ONLY: This deploys a manually administered oracle, not an independently audited price feed. You must provide current values and refresh them at least every 30 minutes for new borrowing. Unpause testnet lending?"))return;
+  }
+  const method="set_paused";
+  const args=kind==="oracle"
+    ?[nativeToScVal(false,{type:"bool"})]
+    :[new Address(admin).toScVal(),nativeToScVal(false,{type:"bool"})];
+  await submitExactTx({
+    contractId,method,args,
+    description:kind==="oracle"?"Activate manual Testnet oracle":"Activate capped Circle USDC / XLM Testnet borrow market"
+  });
+  await refreshButtons();
+}
+async function submitPrice(token){
+  if(!registry)await readRegistry();
+  if(!registry.pilot)fail("No owner-controlled Testnet oracle deployment exists.");
+  const pilot=registry.cfg.activation;
+  const admin=await readWallet({request:true});
+  if(admin!==pilot.adminPublicKey)fail("Only the owner can publish this Testnet oracle quote.");
+  if(await readPaused(pilot.oracleContractId))
+    fail("The owner must first unpause the oracle in Freighter.");
+  const tokenAddress=token==="USDC"?pilot.usdcSac:pilot.xlmSac;
+  if(!C.test(tokenAddress||""))fail("Missing verified Testnet token SAC.");
+  const value=byId(token==="USDC"?"hoxo-oracle-usdc-price":"hoxo-oracle-xlm-price")?.value;
+  const price=parseAmount(value);
+  if(token==="USDC" && (price<8_000_000n||price>12_000_000n))
+    fail("Testnet USDC quotes must be within the $0.80 to $1.20 manual safety band.");
+  if(!window.confirm(
+    "Manual price feed: "+token+" = $"+value+
+    ". This is user-entered TESTNET pricing, not a verified independent oracle. "+
+    "Do you confirm the USD value is based on a recent independently checked source?"))return;
+  await submitExactTx({
+    contractId:pilot.oracleContractId,method:"submit",
+    args:[new Address(admin).toScVal(),new Address(tokenAddress).toScVal(),nativeToScVal(price,{type:"i128"})],
+    amount:value+" USD per "+token,
+    description:"Publish owner-signed manual TESTNET "+token+" oracle quote"
+  });
+}
+async function addUsdcTrustline(){
+  if(pending)fail("Another transaction is pending.");
+  if(!registry)await readRegistry();
+  if(!registry.pilot)fail("USDC market registry not published.");
+  const pilot=registry.cfg.activation;
+  if(!G.test(pilot.usdcIssuer||""))fail("Missing independently verified Circle Testnet issuer.");
+  const address=await readWallet({request:true});
+  const account=await horizon.loadAccount(address);
+  const already=account.balances.some(b=>b.asset_code==="USDC"&&b.asset_issuer===pilot.usdcIssuer);
+  if(already){status("Circle Testnet USDC trustline already exists.");return;}
+  const asset=new Asset("USDC",pilot.usdcIssuer);
+  const tx=new TransactionBuilder(account,{fee:BASE_FEE,networkPassphrase:PASSPHRASE})
+    .addOperation(Operation.changeTrust({asset})).setTimeout(60).build();
+  if(!window.confirm(
+    "CREATE STELLAR TESTNET TRUSTLINE\nAsset: USDC\nCircle Testnet issuer: "+pilot.usdcIssuer+
+    "\nAccount: "+address+"\n\nFreighter will request your explicit approval. This action does not borrow or deposit."))return;
+  pending=true;
+  try{
+    const response=await signTransaction(tx.toXDR(),{
+      address,networkPassphrase:PASSPHRASE,submit:false
+    });
+    if(response?.error||!response.signedTxXdr)fail(response?.error?.message||"Freighter rejected trustline authorization.");
+    const signed=TransactionBuilder.fromXDR(response.signedTxXdr,PASSPHRASE);
+    if(signed.source!==address||signed.operations.length!==1||
+       signed.hash().toString("hex")!==tx.hash().toString("hex")||!signed.signatures?.length)
+      fail("The signed trustline envelope did not match the approved operation.");
+    status("Submitting signed Circle USDC trustline to Stellar Testnet…");
+    const receipt=await horizon.submitTransaction(signed);
+    if(!/^[a-f0-9]{64}$/.test(receipt.hash||""))fail("No valid Stellar transaction receipt.");
+    showReceipt("https://stellar.expert/explorer/testnet/tx/"+receipt.hash,receipt.hash,"Circle Testnet USDC trustline");
+    status("Circle Testnet USDC trustline confirmed: "+receipt.hash,"success");
+  }finally{pending=false;}
+}
+
 function wireUi(){
   const supply=byId("review-availability");
   if(supply){
@@ -298,6 +382,27 @@ function wireUi(){
       catch(error){status(error.message||"Borrow transaction rejected","error");}
     },true);
   }
+
+  byId("hoxo-oracle-activate")?.addEventListener("click",async()=>{
+    try{await ownerControl("oracle");}catch(error){status(error.message||"Oracle activation error","error");}
+  });
+  byId("hoxo-market-activate")?.addEventListener("click",async()=>{
+    try{await ownerControl("market");}catch(error){status(error.message||"Market activation error","error");}
+  });
+  for(const asset of ["XLM","USDC"]){
+    byId("hoxo-price-"+asset.toLowerCase())?.addEventListener("click",async()=>{
+      try{await submitPrice(asset);}catch(error){status(error.message||"Oracle quote rejected","error");}
+    });
+  }
+  byId("hoxo-usdc-trustline")?.addEventListener("click",async()=>{
+    try{await addUsdcTrustline();}catch(error){status(error.message||"USDC trustline failed","error");}
+  });
+  for(const method of ["deposit_collateral","withdraw_collateral"]){
+    byId("hoxo-"+method.replaceAll("_","-"))?.addEventListener("click",async()=>{
+      try{await signAction("market",method,byId("collateral-amount")?.value);}
+      catch(error){status(error.message||"Collateral operation failed","error");}
+    });
+  }
   byId("hoxo-vault-activate")?.addEventListener("click",async()=>{
     try{await activateVault();}
     catch(error){status(error.message||"Activation failed","error");}
@@ -318,7 +423,7 @@ async function start(){
   catch(error){status(error.message||"Testnet readiness unknown","error");}
 }
 window.HoxoTradingBridge=Object.freeze({
-  readWallet,readRegistry,readPaused,refreshButtons,signAction,activateVault
+  readWallet,readRegistry,readPaused,refreshButtons,signAction,activateVault,ownerControl,submitPrice,addUsdcTrustline
 });
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start);
 else void start();

@@ -60,3 +60,26 @@ kbd,code{background:#ebe6eb;border-radius:5px;padding:2px 6px;font-size:.9em}
 li{margin-bottom:10px}
 @media(max-width:920px){.hero{grid-template-columns:1fr}.hero-copy{padding-right:0}.art{margin:0 0 35px;min-height:370px}.panelgrid{grid-template-columns:repeat(2,1fr)}.workspace{grid-template-columns:1fr}.grid{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){header{flex-wrap:wrap}nav{gap:12px}.grid,.panelgrid,.actions-grid{grid-template-columns:1fr}.hero-copy{padding:70px 0 42px}.art{min-height:300px}.float{padding:11px}.float strong{font-size:16px}}
+
+/* Stellar-native market and readiness views */
+nav a[aria-current="page"]{color:var(--purple);text-decoration:underline;text-underline-offset:5px}
+.preview-warning{border:1px solid #edaa86;background:#fff5eb;color:#57392d;border-radius:12px;padding:16px 22px;font-size:14px;margin-bottom:26px}
+.preview-warning strong{color:#35251f}
+.native-market{border-top:1px solid var(--line);padding:21px 2px;display:flex;align-items:flex-start;justify-content:space-between;gap:22px}
+.native-market p{font-size:14px;color:var(--muted);max-width:590px}
+.asset-symbol{display:inline-flex;background:#ebe4ff;color:var(--purple);font-weight:800;padding:6px 10px;border-radius:8px;min-width:55px;justify-content:center;margin-right:10px}
+.market-meta{white-space:nowrap;display:flex;flex-direction:column;gap:8px;align-items:flex-end;font-size:12px}
+.market-meta span{color:#a2522a;font-weight:800;letter-spacing:.08em}
+.market-meta a{font-weight:700}
+.app-section{margin-bottom:70px}
+.app-section .btn{margin:8px 8px 4px 0}
+.native-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin-bottom:24px}
+.native-grid h2{font-size:24px;margin:15px 0}
+.muted{color:var(--muted);font-size:14px}
+.gate-list{list-style:none;padding:0}
+.gate-list li{display:flex;gap:18px;padding:16px 0;border-bottom:1px solid var(--line)}
+.gate-list li>span{font-size:25px;color:var(--purple)}
+.gate-list strong{display:block}
+.gate-list p{margin:5px 0 0;color:var(--muted);font-size:13px}
+@media(max-width:950px){.native-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.native-grid{grid-template-columns:1fr}.native-market{flex-direction:column}.market-meta{align-items:flex-start}}

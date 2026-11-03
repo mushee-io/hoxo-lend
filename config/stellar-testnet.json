@@ -8,11 +8,32 @@
     "vault": null,
     "pool": null,
     "oracle": null,
-    "riskEngine": null
+    "riskEngine": null,
+    "interestRateModel": null,
+    "rwaVaultFactory": null
   },
+  "plannedMarkets": [
+    {
+      "id": "xlm",
+      "symbol": "XLM",
+      "asset": "native",
+      "sacContractId": null,
+      "marketContractId": null,
+      "active": false
+    },
+    {
+      "id": "usdc",
+      "symbol": "USDC",
+      "asset": "issued",
+      "issuer": null,
+      "sacContractId": null,
+      "marketContractId": null,
+      "active": false
+    }
+  ],
   "supportedAssets": [],
   "deploymentStatus": "not-deployed",
   "tradingEnabled": false,
   "lendingEnabled": false,
-  "disclaimer": "No verified Hoxo Lend contracts, lending markets, balances or yields are live."
+  "disclaimer": "Planned XLM/USDC listings are not active; no Hoxo Lend contracts, yields, balances, deposits or borrowing have been verified."
 }

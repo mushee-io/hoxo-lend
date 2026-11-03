@@ -1,27 +1,21 @@
-<!doctype html><html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f5f1eb">
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f5f1eb">
+<meta name="description" content="Hoxo Lend — Dashboard on Stellar Testnet. Lending markets not yet deployed.">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' https://soroban-testnet.stellar.org; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests">
-<meta name="description" content="Hoxo Lend Stellar Testnet application readiness">
-<title>Application — Hoxo Lend</title><link rel="stylesheet" href="/src/stellar.css"></head>
-<body>
-<div class="topline">STELLAR TESTNET · READ-ONLY PREVIEW · CONTRACTS NOT DEPLOYED</div>
-<header><a class="brand" href="/"><span class="brandmark" aria-hidden="true"></span>Hoxo Lend</a><nav aria-label="Primary navigation"><a href="/">Home</a><a href="/app/">Application</a><a href="/docs/">Docs</a><a href="https://github.com/mushee-io/hoxo-lend" target="_blank" rel="noopener noreferrer">GitHub</a></nav></header>
-<main class="shell">
-<section class="app-hero"><div class="eyebrow">HOXO LEND / STELLAR TESTNET</div><h1>Lending dashboard</h1><p>One interface for future supply, borrow, repay and withdraw flows. The current application is read-only, with no verified deployment or live market data.</p></section>
-<section class="panelgrid" aria-label="Market metrics">
-<div class="metric"><span>TOTAL SUPPLIED</span><strong>—</strong><p>No on-chain Hoxo market deployed</p></div>
-<div class="metric"><span>TOTAL BORROWED</span><strong>—</strong><p>Borrowing not enabled</p></div>
-<div class="metric"><span>AVAILABLE LIQUIDITY</span><strong>—</strong><p>No verified lending pools</p></div>
-<div class="metric"><span>ACTIVE MARKETS</span><strong>0</strong><p>No verified market contract IDs</p></div>
-</section>
-<div class="workspace"><section class="panel"><div class="eyebrow">LENDING TERMINAL</div><h2>Actions</h2><div class="actions-grid">
-<div class="action"><h3>Supply</h3><p>Deposit supported Stellar assets.</p><button disabled type="button">Not deployed</button></div>
-<div class="action"><h3>Borrow</h3><p>Borrow against eligible collateral.</p><button disabled type="button">Not live</button></div>
-<div class="action"><h3>Repay</h3><p>Repay outstanding debt.</p><button disabled type="button">Not live</button></div>
-<div class="action"><h3>Withdraw</h3><p>Withdraw supplied balances.</p><button disabled type="button">Not deployed</button></div>
-</div></section>
-<aside class="panel"><div class="eyebrow">CHAIN STATUS</div><h2>Stellar Testnet</h2><p>The network health check is read-only and does not mean the Hoxo contracts are deployed.</p><p id="network-health" role="status">Network has not been checked.</p><button id="check-network" class="btn secondary" type="button">Check Testnet RPC</button><hr><p><strong>Wallet connection:</strong> Freighter integration pending</p><p><strong>Vault contract:</strong> Not deployed</p><p><strong>Network:</strong> Stellar Testnet only</p><p><strong>External audit:</strong> Not complete</p></aside>
-</div>
-</main>
-<footer><div><strong>Hoxo Lend</strong><p>Development preview — never connect or send funds to an unverified contract.</p></div><div><a href="/docs/">Roadmap</a></div></footer>
+<title>Dashboard — Hoxo Lend</title><link rel="stylesheet" href="/src/stellar.css"></head>
+<body data-stellar-page="dashboard">
+<div class="topline">STELLAR TESTNET · SOROBAN · MARKETS NOT DEPLOYED · NO LIVE LENDING</div>
+<header><a class="brand" href="/" aria-label="Hoxo Lend home"><span class="brandmark" aria-hidden="true"></span>Hoxo Lend</a>
+<nav aria-label="Application"><a href="/app/" aria-current="page">Dashboard</a><a href="/app/markets/">Markets</a><a href="/app/borrow/">Borrow</a><a href="/app/liquidations/">Liquidations</a><a href="/app/rwa/">RWA</a><a href="/app/portfolio/">Portfolio</a><a href="/app/protocol/">Protocol</a><a href="/app/readiness/">Readiness</a><a href="/docs/">Docs</a></nav></header>
+<main class="shell"><section class="app-hero"><div class="eyebrow">HOXO LEND · STELLAR TESTNET</div><h1>Dashboard</h1><p>The Stellar-native lending terminal. Intended markets and features are visible; on-chain figures are only shown after independent verification.</p></section>
+<div class="preview-warning"><strong>Development preview — not deployed.</strong> No verified Hoxo Lend lending pools, deposits, yields, or user positions exist in the active registry. This is not a live money market.</div>
+
+<section class="panelgrid" aria-label="Protocol metrics"><div class="metric"><span>TOTAL SUPPLIED</span><strong>—</strong><p>No verified Hoxo pools</p></div><div class="metric"><span>TOTAL BORROWED</span><strong>—</strong><p>Borrowing disabled</p></div><div class="metric"><span>AVAILABLE LIQUIDITY</span><strong>—</strong><p>Not measurable yet</p></div><div class="metric"><span>ACTIVE MARKETS</span><strong>0</strong><p>Contracts not deployed</p></div></section>
+<section class="workspace"><div class="panel"><div class="eyebrow">STELLAR-NATIVE MARKETS</div><h2>Planned credit assets</h2><p class="muted">These are candidate markets, not launched pools. There is no advertised APR, TVL or borrowing capacity.</p>
+<div class="native-market"><div><span class="asset-symbol">XLM</span><strong>Stellar Lumens</strong><p>Native XLM, accessible through its Stellar Asset Contract (SAC). Use a native Stellar Asset Contract, not an EVM wrapper.</p></div><div class="market-meta"><span>NOT LISTED</span><a href="/app/markets/xlm/">Market specification →</a></div></div>
+<div class="native-market"><div><span class="asset-symbol">USDC</span><strong>Stellar-issued USDC</strong><p>Issuer and Testnet SAC address must be independently verified before the asset is allowlisted. Never use legacy synthetic or EVM-issued test tokens.</p></div><div class="market-meta"><span>NOT LISTED</span><a href="/app/markets/usdc/">Market specification →</a></div></div></div>
+<aside class="panel"><div class="eyebrow">MARKET SAFETY</div><h2>0 verified markets</h2><p>Supply/borrow caps, risk parameters and oracle prices cannot be shown as live until the Soroban market contract IDs are verified.</p><ul><li>Native Stellar assets and SAC token interface</li><li>Verified issuer and price freshness checks</li><li>Collateral, LTV and liquidation safety</li><li>Independent Testnet transactions and receipts</li></ul></aside></section>
+<section class="workspace"><div class="panel"><h2>Lending actions</h2><div class="actions-grid"><div class="action"><h3>Supply</h3><p>XLM or verified Stellar USDC after market launch.</p><button type="button" disabled>Not enabled</button></div><div class="action"><h3>Borrow</h3><p>Collateral-backed borrowing after Soroban risk checks.</p><button type="button" disabled>Not enabled</button></div><div class="action"><h3>Repay</h3><p>Repay verifiable on-chain debt positions.</p><button type="button" disabled>Not enabled</button></div><div class="action"><h3>Withdraw</h3><p>Withdraw only after safety and liquidity checks.</p><button type="button" disabled>Not enabled</button></div></div></div>
+<aside class="panel"><h2>Network status</h2><p id="network-health" role="status">Not checked. RPC health is not proof of deployment.</p><button id="check-network" class="btn secondary" type="button">Check Stellar Testnet RPC</button><p class="muted">Wallet: Freighter signing pending. No MetaMask or EVM bridge.</p><p><a href="/app/readiness/">See launch readiness →</a></p></aside></section></main><footer><div><strong>Hoxo Lend</strong><p>Stellar-only development · Not audited · No public deposits</p></div><div><a href="/docs/">Documentation</a> · <a href="https://github.com/mushee-io/hoxo-lend" target="_blank" rel="noopener noreferrer">GitHub</a></div></footer>
 <script src="/src/stellar.js" defer></script></body></html>

@@ -33,7 +33,7 @@ for (const page of pages) {
   const content = readFileSync(page,"utf8");
   assert.match(content,/Stellar Testnet/i,page);
   assert.match(content,/not deployed|not live|paused/i,page);
-  assert.match(content,/\/src\/stellar\.js/i,page);
+  assert.match(content,/\/src\/v2\.js/i,page);
   assert.doesNotMatch(content,/\$2(?:\.00)?M|2000000|\$2,000,000/i,page);
 }
 for (const page of [...pages,"index.html","src/stellar.js"]) {

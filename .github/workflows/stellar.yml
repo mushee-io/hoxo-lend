@@ -18,6 +18,8 @@ jobs:
       - name: Fail closed on wrong-network configuration
         run: |
           node --check src/stellar.js
+          node --check src/v2.js
+          node scripts/check-v2.mjs
           node scripts/check-stellar.mjs
           git diff --check
       - name: Rust toolchain

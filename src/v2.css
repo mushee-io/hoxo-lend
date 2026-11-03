@@ -15,7 +15,7 @@ small,.muted{color:var(--subtle)}
 .shell{max-width:1500px;margin:0 auto;padding-left:clamp(20px,4.8vw,84px);padding-right:clamp(20px,4.8vw,84px)}
 .eyebrow,.kicker{font-size:11px;letter-spacing:.14em;font-weight:700;text-transform:uppercase;color:var(--blue)}
 .section-tag{color:var(--blue);font-family:var(--mono);font-size:11px;letter-spacing:.07em}
-.h-mark{display:inline-grid;grid-template-columns:repeat(2,8px);gap:4px;align-items:center;width:28px;height:29px;transform:skew(-13deg);flex:none}
+.h-mark{position:relative;display:inline-grid;grid-template-columns:repeat(2,8px);gap:4px;align-items:center;width:28px;height:29px;transform:skew(-13deg);flex:none}
 .h-mark i{display:block;height:27px;width:8px;background:var(--blue)}
 .h-mark i+ i{transform:translateY(-3px)}
 .h-mark:after{content:"";position:absolute;width:24px;height:5px;background:var(--blue);transform:translate(0,10px)}

@@ -448,6 +448,21 @@ impl HoxoLendingMarket {
         leave(&env);
     }
 
+    pub fn oracle(env: Env) -> Address {
+        keep(&env);
+        env.storage().instance().get(&Key::Oracle).unwrap()
+    }
+
+    pub fn rate_model(env: Env) -> Address {
+        keep(&env);
+        env.storage().instance().get(&Key::RateModel).unwrap()
+    }
+
+    pub fn assets(env: Env) -> (Address, Address) {
+        keep(&env);
+        (collateral_asset(&env), loan_asset(&env))
+    }
+
     pub fn market_state(env: Env) -> MarketState {
         keep(&env);
         state(&env)
@@ -852,17 +867,29 @@ mod tests {
     impl TestOracle {
         pub fn read(env: Env, asset: Address) -> PriceQuote {
             let price = if asset == env.storage().instance().get::<_, Address>(&1u32).unwrap() {
-                20_000_000
+                env.storage().instance().get(&2u32).unwrap_or(20_000_000)
             } else {
                 10_000_000
             };
             PriceQuote {
                 price,
-                updated_at: env.ledger().timestamp(),
+                updated_at: env.storage().instance().get(&3u32).unwrap_or(1_000_u64),
             }
         }
+
         pub fn setup(env: Env, collateral: Address) {
             env.storage().instance().set(&1u32, &collateral);
+            env.storage().instance().set(&2u32, &20_000_000_i128);
+            env.storage()
+                .instance()
+                .set(&3u32, &env.ledger().timestamp());
+        }
+
+        pub fn set_collateral_price(env: Env, price: i128) {
+            env.storage().instance().set(&2u32, &price);
+            env.storage()
+                .instance()
+                .set(&3u32, &env.ledger().timestamp());
         }
     }
 
@@ -943,7 +970,7 @@ mod tests {
         m.set_paused(&admin, &false);
         m.supply(&supplier, &50_000_000);
         m.deposit_collateral(&borrower, &10_000_000);
-        // Collateral $20, LTV 60% = $12; borrowing $18 exceeds it.
+        // Collateral worth $2, LTV 60% = $1.20; borrowing $1.80 fails.
         m.borrow(&borrower, &18_000_000);
     }
 
@@ -957,6 +984,41 @@ mod tests {
         m.deposit_collateral(&borrower, &20_000_000);
         m.borrow(&borrower, &10_000_000);
         m.withdraw_collateral(&borrower, &18_000_000);
+    }
+
+    #[test]
+    fn liquidations_cannot_exceed_close_factor_and_transfer_real_sac_balances() {
+        let (env, market, admin, supplier, borrower, collateral, loan) = setup();
+        let m = HoxoLendingMarketClient::new(&env, &market);
+        m.set_paused(&admin, &false);
+        m.supply(&supplier, &50_000_000);
+        m.deposit_collateral(&borrower, &20_000_000);
+        m.borrow(&borrower, &10_000_000);
+
+        // A sharp oracle price drop makes the position unhealthy.
+        TestOracleClient::new(&env, &m.oracle()).set_collateral_price(&5_000_000);
+        assert!(!m.risk_of(&borrower).healthy);
+
+        let liquidator = Address::generate(&env);
+        token::StellarAssetClient::new(&env, &loan).mint(&liquidator, &20_000_000);
+        let paid = m.liquidate(&liquidator, &borrower, &10_000_000);
+        assert_eq!(paid, 5_000_000); // 50% close factor, independent of request.
+        assert_eq!(m.borrowed_of(&borrower), 5_000_000);
+        assert!(token::Client::new(&env, &collateral).balance(&liquidator) > 0);
+        assert_eq!(token::Client::new(&env, &loan).balance(&market), 45_000_000);
+    }
+
+    #[test]
+    #[should_panic]
+    fn stale_oracle_prevents_new_borrowing() {
+        let (env, market, admin, supplier, borrower, _, _) = setup();
+        let m = HoxoLendingMarketClient::new(&env, &market);
+        m.set_paused(&admin, &false);
+        m.supply(&supplier, &50_000_000);
+        m.deposit_collateral(&borrower, &20_000_000);
+        // Quotes are stamped at time 1_000; an hour later they are too old.
+        env.ledger().with_mut(|li| li.timestamp += 3_600);
+        m.borrow(&borrower, &1_000_000);
     }
 
     #[test]

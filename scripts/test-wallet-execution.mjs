@@ -29,4 +29,8 @@ for(const path of ["app/supply/index.html","app/borrow/index.html","app/protocol
  const page=readFileSync(path,"utf8");
  assert.match(page,/tx-live\.bundle\.js/);
 }
+for(const path of ["app/supply/index.html","app/borrow/index.html","app/protocol/index.html","app/settings/index.html"]){
+ const page=readFileSync(path,"utf8");
+ assert.ok(page.includes("https://soroban-testnet.stellar.org https://horizon-testnet.stellar.org"),path+": allow both Soroban and Horizon Testnet endpoints");
+}
 console.log("Wallet authorization, honest Testnet state, signed transaction and verified receipt checks are wired.");

@@ -1,0 +1,7 @@
+{
+  "network": "Stellar Testnet",
+  "adminPublicKey": "GCT7YPNK7JAC2FREF5WLROOWQAWRQQV7US2ZB5YK355QV37SAWNERHDB",
+  "confirmation": "DEPLOY_XLM_TESTNET_VAULT",
+  "purpose": "Deploy new user-administered valueless Testnet XLM vault and USDC-collateral/XLM loan market to replace inaccessible ephemeral-admin deployments. Activation itself requires the wallet holder's explicit Freighter authorization.",
+  "operatorNote": "Use only the public G-address; never commit or request private keys. Contracts must deploy paused until administrator-signed safety checks."
+}

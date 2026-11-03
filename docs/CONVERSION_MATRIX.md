@@ -8,9 +8,9 @@
 | InterestRateModel kinked utilisation curve | `soroban/rate-model/src/lib.rs` | First native Soroban implementation and unit tests; integration pending |
 | BitkubOracleAdapter | `soroban/oracle/src/lib.rs` | Permissioned Testnet feed contract prototype; independent data sources, controls and audit pending |
 | MaddethPool markets and borrow/repay | `soroban/market/src/lib.rs` | Port pending in this workstream |
-| Collateral enablement, account risk, indexed interest | Market-level risk/position modules | Pending |
-| Partial liquidation, close factor, seize bonus | Native Soroban liquidation path | Pending |
-| Reserve factor, bad-debt absorption | Market-level solvency controls | Pending |
+| Collateral enablement, account risk, indexed interest | Market-level risk/position modules | Isolated-pair risk checks and indexed shares; multichain/multimarket aggregation and production invariants pending |
+| Partial liquidation, close factor, seize bonus | Native Soroban liquidation path | First isolated-pair liquidation method; stress, oracle and solvency tests pending |
+| Reserve factor, bad-debt absorption | Market-level solvency controls | First reserve/bad-debt path; accounting audit and insolvency simulation pending |
 | IsolatedRwaVault | `soroban/rwa/src/lib.rs` | Initial isolated Soroban RWA loan/vault port; high-risk and unaudited |
 | RwaVaultFactory: issuer registry/factory | Soroban deployment and issuer registry | Pending |
 | MaddethLens | Native contract getters and read-only indexer | Pending |

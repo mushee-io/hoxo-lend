@@ -37,6 +37,8 @@ pub enum OracleError {
     UnauthorizedFeeder = 2,
     InvalidPrice = 3,
     MissingQuote = 4,
+    StaleQuote = 5,
+    InvalidFreshnessWindow = 6,
 }
 
 #[contractevent]
@@ -132,6 +134,23 @@ impl HoxoPriceOracle {
             .extend_ttl(&key, TTL_THRESHOLD, TTL_BUMP);
         quote
     }
+
+    // Consumer-facing oracle access: risk-taking calls MUST use this checked
+    // variant rather than read(), which exposes the raw historical quote.
+    pub fn read_fresh(env: Env, asset: Address, max_age_seconds: u64) -> PriceQuote {
+        if max_age_seconds == 0 {
+            panic_with_error!(&env, OracleError::InvalidFreshnessWindow);
+        }
+        if Self::paused(env.clone()) {
+            panic_with_error!(&env, OracleError::Paused);
+        }
+        let quote = Self::read(env.clone(), asset);
+        let now = env.ledger().timestamp();
+        if now < quote.updated_at || now - quote.updated_at > max_age_seconds {
+            panic_with_error!(&env, OracleError::StaleQuote);
+        }
+        quote
+    }
 }
 
 #[cfg(test)]
@@ -175,6 +194,37 @@ mod tests {
         let oracle = HoxoPriceOracleClient::new(&env, &id);
         oracle.set_paused(&false);
         oracle.submit(&other, &asset, &100_000_000);
+    }
+
+    #[test]
+    fn accepts_recent_quote_with_explicit_freshness_check() {
+        let env = Env::default();
+        env.mock_all_auths();
+        env.ledger().with_mut(|li| li.timestamp = 10_000);
+        let admin = Address::generate(&env);
+        let asset = Address::generate(&env);
+        let id = env.register(HoxoPriceOracle, (&admin,));
+        let oracle = HoxoPriceOracleClient::new(&env, &id);
+        oracle.set_paused(&false);
+        oracle.submit(&admin, &asset, &12_000_000);
+        env.ledger().with_mut(|li| li.timestamp = 10_030);
+        assert_eq!(oracle.read_fresh(&asset, &60).price, 12_000_000);
+    }
+
+    #[test]
+    #[should_panic]
+    fn rejects_stale_quote_for_risk_consumers() {
+        let env = Env::default();
+        env.mock_all_auths();
+        env.ledger().with_mut(|li| li.timestamp = 10_000);
+        let admin = Address::generate(&env);
+        let asset = Address::generate(&env);
+        let id = env.register(HoxoPriceOracle, (&admin,));
+        let oracle = HoxoPriceOracleClient::new(&env, &id);
+        oracle.set_paused(&false);
+        oracle.submit(&admin, &asset, &12_000_000);
+        env.ledger().with_mut(|li| li.timestamp = 10_061);
+        oracle.read_fresh(&asset, &60);
     }
 
     #[test]

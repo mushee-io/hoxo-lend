@@ -1,0 +1,63 @@
+name: Hoxo Lend — Deploy controlled XLM Testnet vault
+on:
+  workflow_dispatch:
+    inputs:
+      admin_public_key:
+        description: "Your funded Stellar Testnet Freighter PUBLIC G-address (never a secret)"
+        required: true
+        type: string
+      confirmation:
+        description: "Type DEPLOY_XLM_TESTNET_VAULT to confirm Testnet-only deployment"
+        required: true
+        type: string
+permissions:
+  contents: write
+concurrency:
+  group: hoxo-owned-testnet-vault
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: github.repository == 'mushee-io/hoxo-lend' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      HOXO_ADMIN_PUBLIC_KEY: ${{inputs.admin_public_key}}
+      HOXO_CONFIRM_TESTNET_ONLY: ${{inputs.confirmation}}
+      CARGO_TARGET_DIR: /tmp/hoxo-owner-target
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+          targets: wasm32v1-none
+      - uses: stellar/stellar-cli@v28.1.0
+      - name: Verify and compile native Soroban vault
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/check-stellar.mjs
+          cargo fmt --manifest-path soroban/Cargo.toml --check
+          cargo test --manifest-path soroban/Cargo.toml --quiet
+          stellar contract build --manifest-path soroban/Cargo.toml
+      - name: Deploy owner-controlled Stellar Testnet vault
+        shell: bash
+        run: bash scripts/activate-testnet-vault.sh
+      - name: Publish on-chain verification
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: owner-controlled-testnet-vault
+          path: out/controlled-pilot/
+          retention-days: 90
+          if-no-files-found: warn
+      - name: Update verified mainnet-proof-safe Testnet registry
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add config/stellar-testnet.json
+          git commit -m "Register user-owned Testnet XLM vault [skip ci]"
+          git push origin HEAD:main

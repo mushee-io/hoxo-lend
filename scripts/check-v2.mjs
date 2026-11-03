@@ -26,6 +26,7 @@ assert.match(css,/#fff(?:fff)?\b/i);
 assert.match(js,/requestAccess/);
 assert.match(js,/networkPassphrase/);
 assert.doesNotMatch(js,/signTransaction\s*\(|submitTransaction\s*\(/);
+assert.doesNotMatch(js,/New owner-controlled Stellar Testnet pilot deployed/);
 
 const cfg = JSON.parse(readFileSync("config/stellar-testnet.json","utf8"));
 assert.equal(cfg.network,"Stellar Testnet");
@@ -42,6 +43,7 @@ for(const file of pageFiles) {
   assert.match(html,/\/src\/v2\.js/,file);
   assert.match(html,/Stellar Testnet/i,file);
   assert.match(html,/paused/i,file);
+  if(file.startsWith("app/")) assert.doesNotMatch(html,/class="readiness-banner"/,file+" contains obsolete banner");
   assert.doesNotMatch(html,/bitkub|WtKUB|KUB Testnet|KUBChain|Maddeth|25925|0x[a-f0-9]{40}/i,file);
   assert.ok(!/>\s*\$[0-9][\d,.]*[MK]?(?:\s|<)/.test(html),file+" must not invent TVL");
   const links=[...html.matchAll(/<a\b[^>]*href="(\/[^"#?]*)"/gi)].map(m=>m[1]);

@@ -59,8 +59,9 @@ function validateRegistry(json){
   if(json?.network!=="Stellar Testnet"||json.passphrase!==PASSPHRASE||
     json.rpcUrl!==RPC||json.horizonUrl!==HORIZON)
     fail("The configured network is not the official Stellar Testnet.");
-  if(json.deploymentStatus==="deployed-paused" && json.deploymentEvidence?.ephemeralAdmin===true)
-    return {cfg:json,pilot:false};
+  // The original seven proof-of-deployment instances are controlled by a lost
+  // ephemeral administrator. A NEW, independently verified owner-controlled
+  // pilot must be evaluated separately; it does not revive those instances.
   const pilot=json.activation;
   if(!pilot||pilot.network!=="Stellar Testnet"||pilot.kind!=="controlled-pilot"||
       !G.test(pilot.adminPublicKey||"")||!C.test(pilot.vaultContractId||"")||

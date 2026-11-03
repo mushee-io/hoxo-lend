@@ -2,6 +2,8 @@ name: Stellar foundation checks
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'src/tx-live.bundle.js'
   pull_request:
 permissions:
   contents: write
@@ -57,6 +59,6 @@ jobs:
             echo "Freighter bundle already matches compiled version"
             exit 0
           fi
-          git commit -m "Publish verified Freighter signing bundle for Vercel static hosting [skip ci]"
+          git commit -m "Publish verified Freighter signing bundle for Vercel static hosting"
           git pull --rebase origin main
           git push origin HEAD:main

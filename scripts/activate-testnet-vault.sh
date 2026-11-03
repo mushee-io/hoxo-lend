@@ -109,7 +109,7 @@ cfg["activation"]={
  "adminPublicKey":admin,"vaultContractId":vault,
  "vaultDeploymentVerified":True,"userApprovedActivation":True,
  "vaultOperationsEnabled":True,
- "marketOperationsEnabled":True,"marketRiskVerified":True,
+ "marketOperationsEnabled":True,"marketRiskVerified":False,
  "marketContractId":market,"oracleContractId":oracle,
  "rateModelContractId":rate,
  "usdcSac":usdc_sac,"usdcIssuer":usdc_issuer,"xlmSac":asset,

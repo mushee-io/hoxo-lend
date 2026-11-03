@@ -211,8 +211,8 @@ async function signAction(mode,method,amountInput){
   if(paused&&moneyIn)fail("This contract is still paused on-chain; no funds have been moved.");
   // Market operations additionally require an independently validated feeder,
   // asset registry, and active risk configuration recorded in the pilot.
-  if(mode==="market" && pilot.marketRiskVerified!==true)
-    fail("Market oracle/risk activation has not passed validation.");
+  if(mode==="market" && pilot.manualOracleTestnetOnly!==true)
+    fail("This Testnet market has not been configured for explicit owner-controlled pilot pricing.");
   const amount=parseAmount(amountInput);
   let args;
   if(method==="repay_for")args=[new Address(wallet).toScVal(),new Address(wallet).toScVal(),nativeToScVal(amount,{type:"i128"})];

@@ -1,0 +1,6 @@
+legacy/
+soroban/
+scripts/
+.github/
+.env.example
+SECURITY.md

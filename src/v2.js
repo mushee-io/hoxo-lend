@@ -206,27 +206,37 @@
       return;
     }
     const api = window.freighterApi;
-    if (!api || typeof api.isConnected !== "function") {
-      toast("Freighter API unavailable. Install Freighter on desktop or check that the extension is enabled.");
+    const bridge = window.HoxoTradingBridge;
+    if ((!api || typeof api.isConnected !== "function") &&
+        (!bridge || typeof bridge.readWallet !== "function")) {
+      toast("Freighter wallet integration unavailable. Refresh and check the browser extension.");
       return;
     }
     button.disabled = true;
     button.textContent = "Connecting…";
     try {
-      const available = await api.isConnected();
-      if (available.error || !available.isConnected) throw new Error("Freighter extension not detected");
-      const access = await api.requestAccess();
-      if (access.error || !STELLAR_ACCOUNT.test(access.address || "")) {
-        throw new Error(access.error?.message || "A valid Stellar account was not returned");
+      let address;
+      if (bridge && typeof bridge.readWallet === "function") {
+        // Bundled official SDK integration supports the current Freighter API.
+        address = await bridge.readWallet({request:true});
+      } else {
+        const available = await api.isConnected();
+        if (available.error || !available.isConnected) throw new Error("Freighter extension not detected");
+        const access = await api.requestAccess();
+        if (access.error || !STELLAR_ACCOUNT.test(access.address || "")) {
+          throw new Error(access.error?.message || "A valid Stellar account was not returned");
+        }
+        const network = await api.getNetwork();
+        if (network.error || network.networkPassphrase !== NETWORK_PASSPHRASE) {
+          throw new Error("Switch Freighter to Stellar Testnet before connecting");
+        }
+        address = access.address;
       }
-      const network = await api.getNetwork();
-      if (network.error || network.networkPassphrase !== NETWORK_PASSPHRASE) {
-        throw new Error("Switch Freighter to Stellar Testnet before connecting");
-      }
-      wallet = { address: access.address };
-      safeText("[data-wallet-address]", access.address.slice(0,6) + "…" + access.address.slice(-5));
-      button.textContent = access.address.slice(0, 5) + "…" + access.address.slice(-4) + " · Disconnect";
-      toast("Connected on Stellar Testnet (read-only). Lending transactions remain disabled.");
+      if (!STELLAR_ACCOUNT.test(address || "")) throw new Error("Freighter returned an invalid public address");
+      wallet = {address};
+      safeText("[data-wallet-address]", address.slice(0,6) + "…" + address.slice(-5));
+      button.textContent = address.slice(0, 5) + "…" + address.slice(-4) + " · Disconnect";
+      toast("Freighter connected on Stellar Testnet. Contract operations require your explicit approval and on-chain activation.");
     } catch (error) {
       toast(error.message || "Could not connect Freighter");
       button.textContent = "Connect Wallet";

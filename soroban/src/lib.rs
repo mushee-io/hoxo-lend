@@ -5,8 +5,8 @@
 // Do not deploy this prototype to mainnet or custody production funds.
 
 use soroban_sdk::{
-    contract, contracterror, contractevent, contractimpl, contracttype, panic_with_error,
-    token, Address, Env,
+    contract, contracterror, contractevent, contractimpl, contracttype, panic_with_error, token,
+    Address, Env,
 };
 
 const TTL_THRESHOLD: u32 = 518_400; // ~30 days, assuming ~5-second ledgers
@@ -84,7 +84,10 @@ impl HoxoLendVault {
 
     pub fn paused(env: Env) -> bool {
         bump(&env);
-        env.storage().instance().get(&DataKey::Paused).unwrap_or(true)
+        env.storage()
+            .instance()
+            .get(&DataKey::Paused)
+            .unwrap_or(true)
     }
 
     pub fn set_paused(env: Env, paused: bool) {
@@ -129,7 +132,9 @@ impl HoxoLendVault {
         env.storage()
             .instance()
             .set(&DataKey::Principal(from.clone()), &updated);
-        env.storage().instance().set(&DataKey::Total, &updated_total);
+        env.storage()
+            .instance()
+            .set(&DataKey::Total, &updated_total);
         bump(&env);
         Deposited { from, amount }.publish(&env);
     }

@@ -1,18 +1,62 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f5f1eb">
-<meta name="description" content="Hoxo Lend: Stellar-native lending protocol in development.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' https://soroban-testnet.stellar.org; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests">
-<title>Hoxo Lend — Credit on Stellar</title><link rel="stylesheet" href="/src/stellar.css">
-</head>
-<body>
-<div class="topline">STELLAR TESTNET · SOROBAN DEVELOPMENT · NOT DEPLOYED · NO PUBLIC FUNDS</div>
-<header><a class="brand" href="/"><span class="brandmark" aria-hidden="true"></span>Hoxo Lend</a><nav aria-label="Primary navigation"><a href="/">Home</a><a href="/app/">Application</a><a href="/docs/">Docs</a><a href="https://github.com/mushee-io/hoxo-lend" target="_blank" rel="noopener noreferrer">GitHub</a></nav></header>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff"><meta name="description" content="Hoxo Lend — Native Credit Markets on Stellar. Supply, borrow, programmable credit and risk infrastructure powered by Soroban.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://soroban-testnet.stellar.org; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests">
+<title>Hoxo Lend — Capital Without Limits, on Stellar</title><link rel="stylesheet" href="/src/v2.css"></head>
+<body data-page="home">
+<div class="site-topbar" data-network-status>STELLAR TESTNET / DEPLOYED &amp; PAUSED · PROTOCOL DEVELOPMENT</div>
+<header class="site-header"><div class="site-header-inner"><a href="/" class="brand" aria-label="Hoxo Lend home"><span class="h-mark" aria-hidden="true"><i></i><i></i></span><span>HOXO <strong>LEND</strong></span></a>
+<button id="site-mobile-toggle" class="mobile-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="site-nav">☰</button>
+<nav class="site-nav" id="site-nav" aria-label="Primary navigation"><a href="/app/">Dashboard</a><a href="/app/markets/">Markets</a><a href="/app/supply/">Supply</a><a href="/app/borrow/">Borrow</a><a href="/app/farm/">Farm</a><a href="/app/credit/">Credit</a><a href="/app/portfolio/">Portfolio</a><a href="/app/analytics/">Analytics</a><a href="/app/protocol/">Protocol</a><a href="/docs/">Docs</a></nav>
+<div class="site-header-actions"><a class="button" href="/app/">Launch App <span aria-hidden="true">↗</span></a></div></div></header>
 <main>
-  <div class="shell"><section class="hero"><div class="hero-copy"><div class="eyebrow">STELLAR-NATIVE CREDIT INFRASTRUCTURE</div><h1>Capital should work.<br>On Stellar.</h1><p class="lede">Hoxo Lend brings the Maddeth lending experience to Stellar through independent Soroban contracts, Stellar assets and wallet-authorized transactions.</p><div class="actions"><a class="btn" href="/app/">Explore the application</a><a class="btn secondary" href="/docs/">Development roadmap</a></div><div class="status"><span class="dot"></span><strong>Stellar Testnet</strong><span>Seven Soroban contracts deployed on Testnet · all paused</span></div></div><div class="art" aria-label="Abstract capital-flow illustration"><svg viewBox="0 0 550 580" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Converging capital routes"><g fill="none" stroke="#281f39" stroke-opacity=".75" stroke-width="1.7"><path d="M-90 100 C250 80 390 210 450 600"/><path d="M-70 200 C180 210 350 270 405 640"/><path d="M-100 350 C210 360 290 410 350 630"/><path d="M600 10 C250 150 250 300 350 640"/><path d="M650 120 C380 180 330 340 410 640"/><path d="M550 -40 C120 120 180 360 300 640"/></g><circle cx="328" cy="318" r="37" fill="#111015"/><circle cx="328" cy="318" r="11" fill="#ff806c"/></svg><div class="float one"><small>01 / SUPPLY</small><strong>Stellar assets</strong></div><div class="float two"><small>02 / BORROW</small><strong>Risk-first lending</strong></div></div></section></div>
-  <section class="band"><div class="shell"><div class="sectiontop">01 — PROTOCOL MODULES</div><h2>One credit layer.<br>Built for Stellar.</h2><div class="grid"><div class="tile"><span class="num">01 / IN PROGRESS</span><h3>Supply vaults</h3><p>Single-asset custody and principal accounting prototype, to be extended into markets.</p></div><div class="tile"><span class="num">02 / PLANNED</span><h3>Borrow & repay</h3><p>Collateralized debt with a validated oracle, rate model and independent risk checks.</p></div><div class="tile"><span class="num">03 / PLANNED</span><h3>Risk & liquidations</h3><p>Health factors, conservative caps, liquidator incentives, and solvency verification.</p></div></div></div></section>
-  <section class="shell intro"><div class="eyebrow">TRANSPARENT TESTNET READINESS</div><h2>Real contracts. Real evidence.<br>No invented activity.</h2><div class="note"><strong>Current launch state: deployed to Testnet, paused.</strong> Hoxo Lend is a separate codebase from Maddeth and is being ported from KUB/EVM architecture to native Stellar Soroban. No public funds can be supplied or borrowed through this website. Read the <a href="/docs/">development milestones</a> for the next steps.</div></section>
+<section class="shell home-hero"><div>
+<div class="eyebrow">[ STELLAR-NATIVE CREDIT INFRASTRUCTURE ]</div>
+<h1 class="home-headline">Capital<br><span>Without Limits.</span></h1>
+<h2 class="home-subheadline">Native Credit Markets on Stellar.</h2>
+<p class="home-lede">Hoxo Lend is a Stellar-native lending and credit protocol enabling users to supply assets, access collateralised liquidity, earn protocol-generated yield, and participate in programmable capital markets.</p>
+<div class="home-actions"><a href="/app/" class="button">Launch App <span aria-hidden="true">↗</span></a><a href="/app/markets/" class="button outline">Explore Markets</a></div>
+<div class="micro-proof"><span class="proof-bar" aria-hidden="true"></span><span>7 SOROBAN CONTRACTS DEPLOYED TO TESTNET</span><span class="badge">PAUSED · UNAUDITED</span></div></div>
+<div class="artboard" role="img" aria-label="Original blue geometric visualization of interconnected liquidity pathways around an abstract Stellar credit nucleus">
+<span class="art-number">HOXO / CAPITAL SYSTEM — 001</span>
+<svg viewBox="0 0 580 640" aria-hidden="true"><defs><clipPath id="vclip"><rect x="0" y="0" width="580" height="640"/></clipPath></defs><g clip-path="url(#vclip)">
+<circle cx="300" cy="305" r="224" fill="none" stroke="#d7deff" stroke-width="1"/>
+<circle cx="300" cy="305" r="176" fill="none" stroke="#b8c7ff" stroke-width="1"/>
+<circle cx="300" cy="305" r="127" fill="none" stroke="#889fff" stroke-width="1"/>
+<circle cx="300" cy="305" r="75" fill="#1037ff"/>
+<path d="M-80 455 C110 10 485 35 682 424" fill="none" stroke="#1037ff" stroke-width="23"/>
+<path d="M-95 505 C80 78 494 69 694 475" fill="none" stroke="#1037ff" stroke-width="15"/>
+<path d="M-109 557 C67 129 516 121 701 532" fill="none" stroke="#1037ff" stroke-width="9"/>
+<path d="M-72 398 C155 -17 478 -24 685 379" fill="none" stroke="#1037ff" stroke-width="29"/>
+<path d="M2 622 C95 204 486 180 635 641" fill="none" stroke="#1037ff" stroke-width="5"/>
+<circle cx="300" cy="305" r="53" fill="#ffffff"/>
+<path d="M263 326 L282 279 L318 279 L338 326 M274 305 L328 305" fill="none" stroke="#1037ff" stroke-width="9" stroke-linecap="square"/>
+<circle cx="120" cy="148" r="9" fill="#1037ff"/><circle cx="485" cy="444" r="7" fill="#1037ff"/>
+<path d="M120 148 L183 196 M485 444 L442 411" stroke="#1037ff" stroke-width="1.5"/>
+</g></svg>
+<div class="art-caption">[ 01 ] CAPITAL FLOWS<br><strong>STELLAR / SOROBAN</strong><br>ON-CHAIN CREDIT INFRASTRUCTURE</div></div></section>
+<section class="stats-band"><div class="shell"><div class="stats-grid">
+<div class="stat-cell"><span class="stat-label">TOTAL VALUE SUPPLIED</span><strong class="stat-value" data-stat="total-supplied">—</strong><span class="stat-help">Awaiting verified on-chain indexer</span></div>
+<div class="stat-cell"><span class="stat-label">TOTAL BORROWED</span><strong class="stat-value" data-stat="total-borrowed">—</strong><span class="stat-help">No published lending activity</span></div>
+<div class="stat-cell"><span class="stat-label">ACTIVE MARKETS</span><strong class="stat-value" data-stat="active-markets">0</strong><span class="stat-help">No public markets enabled</span></div>
+<div class="stat-cell"><span class="stat-label">DEPLOYED CONTRACTS</span><strong class="stat-value" data-stat="contracts">7</strong><span class="stat-help">Testnet, paused and unaudited</span></div>
+</div></div></section>
+<section class="shell section-block"><div class="section-heading"><div><span class="section-tag">[ 01 / FINANCIAL PRIMITIVES ]</span><h2>One credit layer.<br>More ways to move capital.</h2></div><p>A comprehensive credit interface designed for Stellar, grounded in verifiable assets, transparent collateral requirements and native execution.</p></div>
+<div class="features-grid"><article class="feature-card"><span class="feature-number">[ 01 ]</span><h3>Supply</h3><p>Deploy eligible Stellar assets to verified Soroban markets and earn interest sourced from real borrowing activity.</p><a href="/app/supply/">EXPLORE SUPPLY ↗</a></article>
+<article class="feature-card"><span class="feature-number">[ 02 ]</span><h3>Borrow</h3><p>Access collateralized liquidity without selling the assets supporting your position.</p><a href="/app/borrow/">EXPLORE BORROW ↗</a></article>
+<article class="feature-card"><span class="feature-number">[ 03 ]</span><h3>Farm</h3><p>Discover transparent incentive programs, with clear funding, emissions and claim history.</p><a href="/app/farm/">EXPLORE FARM ↗</a></article>
+<article class="feature-card"><span class="feature-number">[ 04 ]</span><h3>Programmable credit</h3><p>Structured on-chain credit facilities and separately gated institutional strategies.</p><a href="/app/credit/">EXPLORE PROGRAMMABLE CREDIT ↗</a></article>
+<article class="feature-card"><span class="feature-number">[ 05 ]</span><h3>Risk engine</h3><p>Explore collateral rules, interest curves and liquidation conditions at contract level.</p><a href="/app/risk/">EXPLORE RISK ENGINE ↗</a></article>
+<article class="feature-card"><span class="feature-number">[ 06 ]</span><h3>Built on Stellar</h3><p>Native asset contracts, explicit wallet approvals and Soroban-based execution.</p><a href="/app/protocol/">EXPLORE BUILT ON STELLAR ↗</a></article></div></section>
+<section class="process-wrap"><div class="shell"><span class="section-tag">[ 02 / CAPITAL CYCLE ]</span><h2>Value moves through<br>the protocol.</h2><div class="process-list"><div class="process-step"><span class="step-number">01 / 05</span><strong>Supply assets</strong></div><div class="process-step"><span class="step-number">02 / 05</span><strong>Lending pool</strong></div><div class="process-step"><span class="step-number">03 / 05</span><strong>Borrowers</strong></div><div class="process-step"><span class="step-number">04 / 05</span><strong>Interest accrual</strong></div><div class="process-step"><span class="step-number">05 / 05</span><strong>Supplier yield</strong></div></div>
+<div class="process-paths"><span>↶ REPAYMENTS</span><span>↶ RESERVE ALLOCATION</span><span>↶ LIQUIDATION PATH</span><span>+ OPTIONAL VERIFIED REWARDS</span></div><p style="font-size:12px;opacity:.8;max-width:680px;margin-top:25px">Illustrative protocol architecture, not a claim of current deposited capital or earned yield. Lending and incentives are not yet enabled.</p></div></section>
+<section class="shell section-block"><div class="section-heading"><div><span class="section-tag">[ 03 / THE UNDERLYING NETWORK ]</span><h2>Infrastructure you can verify.</h2></div><a href="/app/protocol/" class="button outline">Inspect protocol ↗</a></div>
+<div class="architecture-grid"><article class="architecture-card"><span class="eyebrow">ON-CHAIN / STELLAR TESTNET</span><h3>Real Soroban deployments</h3><p>Seven contract instances are recorded on Stellar Testnet: the lending market, custody vault, oracle, interest-rate model, RWA modules and account lens. Each address links to independent explorer evidence.</p><div class="detail-item"><span>Deployment</span><strong data-release-status>Contracts deployed · Operations paused</strong></div><div class="detail-item"><span>Active public markets</span><strong data-stat="active-markets">0</strong></div><a href="/app/protocol/" class="button outline" style="margin-top:24px">View contracts ↗</a></article>
+<article class="architecture-card"><span class="eyebrow">SECURITY / TESTNET ONLY</span><h3>Activation is earned, not assumed.</h3><p>No public lending, deposits or borrowing are permitted on the paused deployment. The current administrator was an ephemeral build identity; audited, team-governed deployment and wallet acceptance are still required.</p><div class="detail-item"><span>Financial transactions</span><strong>DISABLED</strong></div><div class="detail-item"><span>Independent audit</span><strong>NOT COMPLETED</strong></div><a href="/app/readiness/" class="button outline" style="margin-top:24px">View release readiness ↗</a></article></div></section>
 </main>
-<footer><div><a class="brand" href="/">Hoxo Lend</a><p>Testnet software · not audited · no live credit market.</p></div><div><a href="https://github.com/mushee-io/hoxo-lend" target="_blank" rel="noopener noreferrer">Source code</a> · <a href="/docs/">Docs</a></div></footer>
-<script src="/src/stellar.js" defer></script></body></html>
+<footer class="site-footer"><div class="shell site-footer-inner">
+<div><a class="brand" href="/"><span class="h-mark" aria-hidden="true"><i></i><i></i></span><span>HOXO <strong>LEND</strong></span></a><p>Stellar-native lending, credit and capital infrastructure. Testnet contracts deployed and paused. No public lending.</p><small>BUILT FOR STELLAR · POWERED BY SOROBAN</small></div>
+<div><div class="footer-heading">PLATFORM</div><a href="/app/markets/">Markets</a><a href="/app/supply/">Supply</a><a href="/app/borrow/">Borrow</a><a href="/app/credit/">Credit</a><a href="/app/analytics/">Analytics</a></div>
+<div><div class="footer-heading">RESOURCES</div><a href="/docs/">Documentation</a><a href="/app/risk/">Risk &amp; security</a><a href="/app/readiness/">Testnet readiness</a><a href="https://github.com/mushee-io/hoxo-lend" target="_blank" rel="noopener noreferrer">Source code ↗</a></div>
+</div><div class="shell legal-strip">© 2026 HOXO LEND. EXPERIMENTAL TESTNET SOFTWARE · CONTRACTS PAUSED · NOT INVESTMENT ADVICE.</div></footer>
+<script src="/src/v2.js" defer></script></body></html>

@@ -9,10 +9,10 @@ description = "Hoxo Lend Stellar Soroban custody-vault prototype (not production
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-soroban-sdk = "=29.0.0"
+soroban-sdk = "=29.0.1"
 
 [dev-dependencies]
-soroban-sdk = { version = "=29.0.0", features = ["testutils"] }
+soroban-sdk = { version = "=29.0.1", features = ["testutils"] }
 
 [profile.release]
 opt-level = "z"

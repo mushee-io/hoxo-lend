@@ -61,10 +61,43 @@
 
   function renderNetworkState() {
     const verified = isVerified(config);
-    safeText("[data-network-status]", verified ? "STELLAR TESTNET / DEPLOYED & PAUSED" : "STELLAR TESTNET / UNVERIFIED");
-    safeText("[data-verification-status]", verified ? "Seven Soroban contract IDs verified in deployment registry" : "Verification pending");
+    const pilot = config?.activation;
+    const ownedPilot = verified && pilot?.kind === "controlled-pilot" &&
+      pilot?.vaultDeploymentVerified === true &&
+      CONTRACT_ID.test(pilot.vaultContractId || "") &&
+      CONTRACT_ID.test(pilot.marketContractId || "") &&
+      CONTRACT_ID.test(pilot.oracleContractId || "") &&
+      STELLAR_ACCOUNT.test(pilot.adminPublicKey || "");
+    safeText("[data-network-status]", ownedPilot ? "STELLAR TESTNET / OWNER PILOT DEPLOYED" :
+      verified ? "STELLAR TESTNET / LEGACY DEPLOYMENT PAUSED" : "STELLAR TESTNET / UNVERIFIED");
+    safeText("[data-verification-status]", ownedPilot
+      ? "Owner-controlled XLM vault and Circle USDC/XLM lending market registered on Stellar Testnet"
+      : verified ? "Seven older contract IDs verified in registry" : "Verification pending");
     safeText("[data-deployment-count]", verified ? "07" : "—");
-    safeText("[data-release-status]", verified ? "Contracts deployed · Operations paused" : "Deployment verification unavailable");
+    safeText("[data-release-status]", ownedPilot
+      ? "Owned Testnet pilot deployed · Freighter administrator signatures required"
+      : verified ? "Legacy contracts deployed · Operations paused" : "Deployment verification unavailable");
+
+    if (ownedPilot) {
+      const banner = $(".readiness-banner > div");
+      if (banner) {
+        const heading = document.createElement("strong");
+        heading.textContent = "New owner-controlled Stellar Testnet pilot deployed.";
+        const supply = document.createElement("a");
+        supply.href = "/app/supply/";
+        supply.textContent = "Activate XLM vault in Freighter ↗";
+        const protocol = document.createElement("a");
+        protocol.href = "/app/protocol/";
+        protocol.textContent = "Activate the oracle and market ↗";
+        banner.replaceChildren(
+          heading,
+          document.createTextNode(" The XLM vault and Circle USDC/XLM market now have a permanent administrator, but wallet-signed activation and valid oracle quotes are still required. The original seven proof contracts remain paused. "),
+          supply,
+          document.createTextNode(" · "),
+          protocol
+        );
+      }
+    }
   }
 
   function renderMetrics() {

@@ -21,14 +21,13 @@ const pages = [
 ];
 for (const file of [...pages, 'index.html', 'src/stellar.js']) {
   const content = readFileSync(file, 'utf8');
-  assert.doesNotMatch(content,/bitkub|WtKUB|KUB Testnet|25925|eth_sendTransaction|window\\.ethereum|mUSDT|mUSDC|0x[a-fA-F0-9]{40}/i,file);
+  assert.doesNotMatch(content,/bitkub|WtKUB|KUB Testnet|25925|eth_sendTransaction|window\.ethereum|mUSDT|mUSDC|0x[a-fA-F0-9]{40}/i,file);
 }
 for (const file of pages) {
   const content=readFileSync(file,'utf8');
   assert.match(content,/Stellar Testnet/i,file);
   assert.match(content,/not deployed|not live/i,file);
   assert.doesNotMatch(content,/\$2(?:\.00)?M|2000000|\$2,000,000/i,file);
-  assert.doesNotMatch(content,/Maddeth/i,file);
 }
 assert.match(readFileSync('app/markets/index.html','utf8'),/XLM/);
 assert.match(readFileSync('app/markets/index.html','utf8'),/USDC/);

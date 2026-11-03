@@ -14,7 +14,11 @@ This is the independent Stellar-only successor to the KUB Chain Maddeth design. 
 
 For porting order, risk gates and the feature-by-feature mapping from Maddeth see [docs/PORTING_PLAN.md](docs/PORTING_PLAN.md).
 
-## Stellar application routes\n\nThe Hoxo Lend app preserves separate Dashboard, XLM/USDC Markets, Supply/Borrow, Liquidations, RWA, Portfolio, Protocol and Readiness views. All are read-only or disabled until verified Stellar deployment; planned asset listings are **not** active pools. The original KUB UI remains archived in `legacy/maddeth-kub/`.\n\n## Local website
+## Stellar application routes
+
+The Hoxo Lend app preserves separate Dashboard, XLM/USDC Markets, Supply/Borrow, Liquidations, RWA, Portfolio, Protocol and Readiness views. All are read-only or disabled until verified Stellar deployment; planned asset listings are **not** active pools. The original KUB UI remains archived in `legacy/maddeth-kub/`.
+
+## Local website
 
 Run `python3 -m http.server 8080` at the repository root, then open `http://localhost:8080/` or `http://localhost:8080/app/`.
 

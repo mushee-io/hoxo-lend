@@ -22,6 +22,17 @@ jobs:
           node scripts/check-v2.mjs
           node scripts/check-stellar.mjs
           git diff --check
+      - name: Bundle and test official Stellar SDK / Freighter browser transaction client
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check src/tx-live.js
+          npm install --no-audit --no-fund
+          npm run test:frontend
+          npm run build
+          test -s dist/src/tx-live.bundle.js
+          test -s dist/app/supply/index.html
+          test -s dist/config/stellar-testnet.json
       - name: Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:

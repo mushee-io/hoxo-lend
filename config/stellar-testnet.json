@@ -1,0 +1,18 @@
+{
+  "network": "Stellar Testnet",
+  "passphrase": "Test SDF Network ; September 2015",
+  "rpcUrl": "https://soroban-testnet.stellar.org",
+  "horizonUrl": "https://horizon-testnet.stellar.org",
+  "explorer": "https://stellar.expert/explorer/testnet",
+  "contracts": {
+    "vault": null,
+    "pool": null,
+    "oracle": null,
+    "riskEngine": null
+  },
+  "supportedAssets": [],
+  "deploymentStatus": "not-deployed",
+  "tradingEnabled": false,
+  "lendingEnabled": false,
+  "disclaimer": "No verified Hoxo Lend contracts, lending markets, balances or yields are live."
+}

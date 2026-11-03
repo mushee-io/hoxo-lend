@@ -38,7 +38,7 @@
   "deploymentStatus": "deployed-paused",
   "tradingEnabled": false,
   "lendingEnabled": false,
-  "disclaimer": "Real Soroban contracts deployed on Stellar Testnet, PAUSED and UNAUDITED. HXTEST is a throwaway Testnet asset, not USDC. Public deposits and borrowing are disabled.",
+  "disclaimer": "Original seven contracts stay paused. New owner-controlled XLM vault and real Circle Testnet USDC-collateral/XLM-borrow market are deployed paused. Admin must sign oracle quotes and unpause. TESTNET only, manual-price oracle is not independent or audited.",
   "deploymentEvidence": {
     "network": "Stellar Testnet",
     "verifiedAt": "2026-11-03T18:19:07.767920+00:00",
@@ -50,5 +50,26 @@
     "xlmSac": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
     "hxTestSac": "CCMFO7ELH4NCNSBHLMAIY3BT233K3JIGVALPMDEX5SZCYRYEELWXCQ4C",
     "hxTestIssuer": "GBKYFJAXNBIKYNS564KI2BI4BN2WMRJF55OZDIBWWC6CNCPGJ4WPZH6L"
+  },
+  "activation": {
+    "network": "Stellar Testnet",
+    "kind": "controlled-pilot",
+    "asset": "native",
+    "adminPublicKey": "GCT7YPNK7JAC2FREF5WLROOWQAWRQQV7US2ZB5YK355QV37SAWNERHDB",
+    "vaultContractId": "CCEXV6YXD2LGTSTHPSTH2QF7OAKLN7VWLARGI3ENZ4OZPVBDGNVYMWQS",
+    "vaultDeploymentVerified": true,
+    "userApprovedActivation": true,
+    "vaultOperationsEnabled": true,
+    "marketOperationsEnabled": true,
+    "marketRiskVerified": false,
+    "marketContractId": "CABWH4G5XSFKBDGZXKRSPKSR6E3KFPEM7OCNW37Z3NYLZONLGHDSLXQ4",
+    "oracleContractId": "CDRGX6NRNZGIHI55C65IBXPYMPK4SI3P5EZAOM5QISMF5YFNNHJ6VXMC",
+    "rateModelContractId": "CBLQ7OQN4BH2DUCZUQXSRNZ2TFROQPKGXSXA5QNNR62ALEF2L267J2FG",
+    "usdcSac": "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA",
+    "usdcIssuer": "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+    "xlmSac": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+    "manualOracleTestnetOnly": true,
+    "deploymentRunUrl": "https://github.com/mushee-io/hoxo-lend/actions/runs/41705461200",
+    "notice": "Owner-operated XLM vault and USDC/XLM isolated market. Initially paused; admin must approve oracle setup, fresh rates and market activation via Freighter. Manual oracle is NOT an independent production price feed."
   }
 }

@@ -26,7 +26,7 @@ pub struct PriceQuote {
 
 #[contractclient(name = "OracleClient")]
 pub trait OracleInterface {
-    fn read(env: Env, asset: Address) -> PriceQuote;
+    fn read_fresh(env: Env, asset: Address, max_age_seconds: u64) -> PriceQuote;
 }
 
 #[contractclient(name = "RateModelClient")]
@@ -275,7 +275,7 @@ fn units(env: &Env, asset: &Address) -> i128 {
 
 fn price(env: &Env, asset: &Address) -> i128 {
     let oracle: Address = env.storage().instance().get(&Key::Oracle).unwrap();
-    let q = OracleClient::new(env, &oracle).read(asset);
+    let q = OracleClient::new(env, &oracle).read_fresh(asset, &MAX_ORACLE_AGE);
     let now = env.ledger().timestamp();
     if q.price <= 0 || q.updated_at > now {
         panic_with_error!(env, MarketError::OracleInvalid);
@@ -865,6 +865,22 @@ mod tests {
 
     #[contractimpl]
     impl TestOracle {
+        pub fn read_fresh(env: Env, asset: Address, max_age_seconds: u64) -> PriceQuote {
+            let quote = Self::read(env.clone(), asset);
+            let now = env.ledger().timestamp();
+            let paused: bool = env.storage().instance().get(&4u32).unwrap_or(false);
+            if paused || max_age_seconds == 0 || quote.updated_at > now
+                || now - quote.updated_at > max_age_seconds
+            {
+                panic_with_error!(&env, MarketError::OracleStale);
+            }
+            quote
+        }
+
+        pub fn set_paused(env: Env, paused: bool) {
+            env.storage().instance().set(&4u32, &paused);
+        }
+
         pub fn read(env: Env, asset: Address) -> PriceQuote {
             let price = if asset == env.storage().instance().get::<_, Address>(&1u32).unwrap() {
                 env.storage().instance().get(&2u32).unwrap_or(20_000_000)
@@ -1018,6 +1034,18 @@ mod tests {
         m.deposit_collateral(&borrower, &20_000_000);
         // Quotes are stamped at time 1_000; an hour later they are too old.
         env.ledger().with_mut(|li| li.timestamp += 3_600);
+        m.borrow(&borrower, &1_000_000);
+    }
+
+    #[test]
+    #[should_panic]
+    fn paused_oracle_prevents_new_borrowing() {
+        let (env, market, admin, supplier, borrower, _, _) = setup();
+        let m = HoxoLendingMarketClient::new(&env, &market);
+        m.set_paused(&admin, &false);
+        m.supply(&supplier, &50_000_000);
+        m.deposit_collateral(&borrower, &20_000_000);
+        TestOracleClient::new(&env, &m.oracle()).set_paused(&true);
         m.borrow(&borrower, &1_000_000);
     }
 

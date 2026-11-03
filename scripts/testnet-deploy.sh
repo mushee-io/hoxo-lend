@@ -84,7 +84,7 @@ LENS="$(deploy lens --wasm "$WASM/hoxo_lend_lens.wasm")"
 VAULT="$(deploy vault --wasm "$WASM/hoxo_lend_vault.wasm" -- --admin "$ADMIN" --asset "$XLM_SAC")"
 MATURITY="$(date -u -d '+30 days' +%s)"
 RWA="$(deploy rwaVault --wasm "$WASM/hoxo_lend_rwa_vault.wasm" -- --owner "$ADMIN" --borrower "$DEPLOYER" --asset "$XLM_SAC" --maturity "$MATURITY" --debt_cap 1000000000)"
-RISK='{"ltv_bps":5000,"liquidation_bps":7000,"liquidation_bonus_bps":500,"reserve_factor_bps":1000,"supply_cap":10000000000,"borrow_cap":5000000000}'
+RISK='{"ltv_bps":5000,"liquidation_bps":7000,"liquidation_bonus_bps":500,"reserve_factor_bps":1000,"supply_cap":"10000000000","borrow_cap":"5000000000"}'
 MARKET="$(deploy market --wasm "$WASM/hoxo_lend_market.wasm" -- --admin "$ADMIN" --guardian "$ADMIN" --oracle "$ORACLE" --rate_model "$RATE" --collateral_token "$HXTEST_SAC" --loan_token "$XLM_SAC" --config "$RISK")"
 
 verify_paused(){

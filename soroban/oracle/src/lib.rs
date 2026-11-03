@@ -155,7 +155,10 @@ mod tests {
         oracle.submit(&feed, &asset, &22_300_000);
         assert_eq!(
             oracle.read(&asset),
-            PriceQuote { price: 22_300_000, updated_at: 10_000 }
+            PriceQuote {
+                price: 22_300_000,
+                updated_at: 10_000,
+            }
         );
         assert!(oracle.is_feeder(&feed));
     }

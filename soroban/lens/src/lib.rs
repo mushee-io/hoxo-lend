@@ -163,7 +163,11 @@ mod tests {
             60_000
         }
         pub fn position_of(_env: Env, _user: Address) -> Position {
-            Position { supply_shares: 0, debt_shares: 20_000, collateral: 70_000 }
+            Position {
+                supply_shares: 0,
+                debt_shares: 20_000,
+                collateral: 70_000,
+            }
         }
         pub fn supplied_of(_env: Env, _user: Address) -> i128 {
             0

@@ -180,7 +180,9 @@ fn position(env: &Env, user: &Address) -> Position {
         collateral: 0,
     });
     if env.storage().persistent().has(&key) {
-        env.storage().persistent().extend_ttl(&key, TTL_THRESHOLD, TTL_BUMP);
+        env.storage()
+            .persistent()
+            .extend_ttl(&key, TTL_THRESHOLD, TTL_BUMP);
     }
     result
 }
@@ -188,7 +190,9 @@ fn position(env: &Env, user: &Address) -> Position {
 fn store_position(env: &Env, user: &Address, p: &Position) {
     let key = Key::Position(user.clone());
     env.storage().persistent().set(&key, p);
-    env.storage().persistent().extend_ttl(&key, TTL_THRESHOLD, TTL_BUMP);
+    env.storage()
+        .persistent()
+        .extend_ttl(&key, TTL_THRESHOLD, TTL_BUMP);
 }
 
 fn supply_total(env: &Env, s: &MarketState) -> i128 {
@@ -204,11 +208,19 @@ fn supplied(env: &Env, p: &Position, s: &MarketState) -> i128 {
 }
 
 fn borrowed(env: &Env, p: &Position, s: &MarketState) -> i128 {
-    ceil_div(env, checked(env, p.debt_shares.checked_mul(s.borrow_index)), INDEX)
+    ceil_div(
+        env,
+        checked(env, p.debt_shares.checked_mul(s.borrow_index)),
+        INDEX,
+    )
 }
 
 fn debt_amount_total(env: &Env, s: &MarketState) -> i128 {
-    ceil_div(env, checked(env, s.debt_shares.checked_mul(s.borrow_index)), INDEX)
+    ceil_div(
+        env,
+        checked(env, s.debt_shares.checked_mul(s.borrow_index)),
+        INDEX,
+    )
 }
 
 fn cash(env: &Env) -> i128 {
@@ -291,9 +303,14 @@ fn risk(env: &Env, p: &Position, s: &MarketState) -> RiskView {
     let col = collateral_asset(env);
     let debt_token = loan_asset(env);
     let collateral_usd = multiply_div(env, p.collateral, price(env, &col), units(env, &col));
-    let debt_usd = ceil_div(env, checked(env, debt.checked_mul(price(env, &debt_token))), units(env, &debt_token));
+    let debt_usd = ceil_div(
+        env,
+        checked(env, debt.checked_mul(price(env, &debt_token))),
+        units(env, &debt_token),
+    );
     let borrow_limit_usd = multiply_div(env, collateral_usd, i128::from(c.ltv_bps), BPS);
-    let liquidation_limit_usd = multiply_div(env, collateral_usd, i128::from(c.liquidation_bps), BPS);
+    let liquidation_limit_usd =
+        multiply_div(env, collateral_usd, i128::from(c.liquidation_bps), BPS);
     RiskView {
         collateral_usd,
         debt_usd,
@@ -329,11 +346,17 @@ fn accrue(env: &Env) {
     }
     let elapsed = i128::from(now - s.last_accrual);
     let annual = checked(env, i128::from(rate_bps).checked_mul(elapsed));
-    let index_delta = multiply_div(env, s.borrow_index, annual, checked(env, BPS.checked_mul(YEAR_SECONDS)));
+    let index_delta = multiply_div(
+        env,
+        s.borrow_index,
+        annual,
+        checked(env, BPS.checked_mul(YEAR_SECONDS)),
+    );
     let new_index = checked(env, s.borrow_index.checked_add(index_delta));
     let after_debt = multiply_div(env, s.debt_shares, new_index, INDEX);
     let interest = checked(env, after_debt.checked_sub(before_debt));
-    let reserve_interest = multiply_div(env, interest, i128::from(cfg(env).reserve_factor_bps), BPS);
+    let reserve_interest =
+        multiply_div(env, interest, i128::from(cfg(env).reserve_factor_bps), BPS);
     let supplier_interest = interest - reserve_interest;
     if s.supply_shares > 0 && supplier_interest > 0 {
         let supplier_index_delta = multiply_div(env, supplier_interest, INDEX, s.supply_shares);
@@ -368,7 +391,9 @@ impl HoxoLendingMarket {
         env.storage().instance().set(&Key::Guardian, &guardian);
         env.storage().instance().set(&Key::Oracle, &oracle);
         env.storage().instance().set(&Key::RateModel, &rate_model);
-        env.storage().instance().set(&Key::CollateralAsset, &collateral_token);
+        env.storage()
+            .instance()
+            .set(&Key::CollateralAsset, &collateral_token);
         env.storage().instance().set(&Key::LoanAsset, &loan_token);
         env.storage().instance().set(&Key::Config, &config);
         env.storage().instance().set(&Key::Paused, &true);
@@ -414,7 +439,9 @@ impl HoxoLendingMarket {
         validate_config(&env, &config);
         // An admin cannot lower a cap below existing aggregate exposure.
         let s = state(&env);
-        if supply_total(&env, &s) > config.supply_cap || debt_amount_total(&env, &s) > config.borrow_cap {
+        if supply_total(&env, &s) > config.supply_cap
+            || debt_amount_total(&env, &s) > config.borrow_cap
+        {
             panic_with_error!(&env, MarketError::LimitExceeded);
         }
         env.storage().instance().set(&Key::Config, &config);
@@ -482,11 +509,19 @@ impl HoxoLendingMarket {
         let mut p = position(&env, &user);
         p.supply_shares = checked(&env, p.supply_shares.checked_add(shares));
         s.supply_shares = checked(&env, s.supply_shares.checked_add(shares));
-        token::Client::new(&env, &loan_asset(&env))
-            .transfer(&user, &env.current_contract_address(), &amount);
+        token::Client::new(&env, &loan_asset(&env)).transfer(
+            &user,
+            &env.current_contract_address(),
+            &amount,
+        );
         store_position(&env, &user, &p);
         save_state(&env, &s);
-        MarketAction { user, action: 1, amount }.publish(&env);
+        MarketAction {
+            user,
+            action: 1,
+            amount,
+        }
+        .publish(&env);
         leave(&env);
     }
 
@@ -505,17 +540,29 @@ impl HoxoLendingMarket {
         if cash(&env) < amount {
             panic_with_error!(&env, MarketError::InsufficientLiquidity);
         }
-        let shares = ceil_div(&env, checked(&env, amount.checked_mul(INDEX)), s.supply_index);
+        let shares = ceil_div(
+            &env,
+            checked(&env, amount.checked_mul(INDEX)),
+            s.supply_index,
+        );
         if shares > p.supply_shares {
             panic_with_error!(&env, MarketError::InsufficientBalance);
         }
         p.supply_shares -= shares;
         s.supply_shares -= shares;
-        token::Client::new(&env, &loan_asset(&env))
-            .transfer(&env.current_contract_address(), &user, &amount);
+        token::Client::new(&env, &loan_asset(&env)).transfer(
+            &env.current_contract_address(),
+            &user,
+            &amount,
+        );
         store_position(&env, &user, &p);
         save_state(&env, &s);
-        MarketAction { user, action: 2, amount }.publish(&env);
+        MarketAction {
+            user,
+            action: 2,
+            amount,
+        }
+        .publish(&env);
         leave(&env);
     }
 
@@ -528,10 +575,18 @@ impl HoxoLendingMarket {
         enter(&env);
         let mut p = position(&env, &user);
         p.collateral = checked(&env, p.collateral.checked_add(amount));
-        token::Client::new(&env, &collateral_asset(&env))
-            .transfer(&user, &env.current_contract_address(), &amount);
+        token::Client::new(&env, &collateral_asset(&env)).transfer(
+            &user,
+            &env.current_contract_address(),
+            &amount,
+        );
         store_position(&env, &user, &p);
-        MarketAction { user, action: 3, amount }.publish(&env);
+        MarketAction {
+            user,
+            action: 3,
+            amount,
+        }
+        .publish(&env);
         leave(&env);
     }
 
@@ -550,10 +605,18 @@ impl HoxoLendingMarket {
         if !risk(&env, &p, &state(&env)).healthy {
             panic_with_error!(&env, MarketError::Undercollateralized);
         }
-        token::Client::new(&env, &collateral_asset(&env))
-            .transfer(&env.current_contract_address(), &user, &amount);
+        token::Client::new(&env, &collateral_asset(&env)).transfer(
+            &env.current_contract_address(),
+            &user,
+            &amount,
+        );
         store_position(&env, &user, &p);
-        MarketAction { user, action: 4, amount }.publish(&env);
+        MarketAction {
+            user,
+            action: 4,
+            amount,
+        }
+        .publish(&env);
         leave(&env);
     }
 
@@ -573,17 +636,29 @@ impl HoxoLendingMarket {
         if checked(&env, debt_amount_total(&env, &s).checked_add(amount)) > cfg(&env).borrow_cap {
             panic_with_error!(&env, MarketError::LimitExceeded);
         }
-        let shares = ceil_div(&env, checked(&env, amount.checked_mul(INDEX)), s.borrow_index);
+        let shares = ceil_div(
+            &env,
+            checked(&env, amount.checked_mul(INDEX)),
+            s.borrow_index,
+        );
         p.debt_shares = checked(&env, p.debt_shares.checked_add(shares));
         s.debt_shares = checked(&env, s.debt_shares.checked_add(shares));
         if !risk(&env, &p, &s).inside_ltv {
             panic_with_error!(&env, MarketError::Undercollateralized);
         }
-        token::Client::new(&env, &loan_asset(&env))
-            .transfer(&env.current_contract_address(), &user, &amount);
+        token::Client::new(&env, &loan_asset(&env)).transfer(
+            &env.current_contract_address(),
+            &user,
+            &amount,
+        );
         store_position(&env, &user, &p);
         save_state(&env, &s);
-        MarketAction { user, action: 5, amount }.publish(&env);
+        MarketAction {
+            user,
+            action: 5,
+            amount,
+        }
+        .publish(&env);
         leave(&env);
     }
 
@@ -609,13 +684,21 @@ impl HoxoLendingMarket {
         if shares == 0 {
             panic_with_error!(&env, MarketError::Dust);
         }
-        token::Client::new(&env, &loan_asset(&env))
-            .transfer(&payer, &env.current_contract_address(), &paid);
+        token::Client::new(&env, &loan_asset(&env)).transfer(
+            &payer,
+            &env.current_contract_address(),
+            &paid,
+        );
         p.debt_shares -= shares;
         s.debt_shares -= shares;
         store_position(&env, &user, &p);
         save_state(&env, &s);
-        MarketAction { user, action: 6, amount: paid }.publish(&env);
+        MarketAction {
+            user,
+            action: 6,
+            amount: paid,
+        }
+        .publish(&env);
         leave(&env);
         paid
     }
@@ -667,16 +750,27 @@ impl HoxoLendingMarket {
         if shares == 0 {
             panic_with_error!(&env, MarketError::Dust);
         }
-        token::Client::new(&env, &token_debt)
-            .transfer(&liquidator, &env.current_contract_address(), &paid);
+        token::Client::new(&env, &token_debt).transfer(
+            &liquidator,
+            &env.current_contract_address(),
+            &paid,
+        );
         p.debt_shares -= shares;
         s.debt_shares -= shares;
         p.collateral -= seize;
-        token::Client::new(&env, &token_col)
-            .transfer(&env.current_contract_address(), &liquidator, &seize);
+        token::Client::new(&env, &token_col).transfer(
+            &env.current_contract_address(),
+            &liquidator,
+            &seize,
+        );
         store_position(&env, &user, &p);
         save_state(&env, &s);
-        MarketAction { user, action: 7, amount: paid }.publish(&env);
+        MarketAction {
+            user,
+            action: 7,
+            amount: paid,
+        }
+        .publish(&env);
         leave(&env);
         paid
     }
@@ -697,7 +791,11 @@ impl HoxoLendingMarket {
             if s.supply_shares <= 0 || loss >= supply_total(&env, &s) {
                 panic_with_error!(&env, MarketError::BadDebtNotEligible);
             }
-            let loss_index = ceil_div(&env, checked(&env, loss.checked_mul(INDEX)), s.supply_shares);
+            let loss_index = ceil_div(
+                &env,
+                checked(&env, loss.checked_mul(INDEX)),
+                s.supply_shares,
+            );
             if loss_index >= s.supply_index {
                 panic_with_error!(&env, MarketError::BadDebtNotEligible);
             }
@@ -708,7 +806,12 @@ impl HoxoLendingMarket {
         p.debt_shares = 0;
         store_position(&env, &user, &p);
         save_state(&env, &s);
-        MarketAction { user, action: 8, amount: debt }.publish(&env);
+        MarketAction {
+            user,
+            action: 8,
+            amount: debt,
+        }
+        .publish(&env);
         leave(&env);
         debt
     }
@@ -727,8 +830,11 @@ impl HoxoLendingMarket {
             panic_with_error!(&env, MarketError::InsufficientLiquidity);
         }
         s.reserves -= amount;
-        token::Client::new(&env, &loan_asset(&env))
-            .transfer(&env.current_contract_address(), &to, &amount);
+        token::Client::new(&env, &loan_asset(&env)).transfer(
+            &env.current_contract_address(),
+            &to,
+            &amount,
+        );
         save_state(&env, &s);
         leave(&env);
     }

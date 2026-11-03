@@ -94,7 +94,9 @@ impl HoxoRwaFactory {
         owner(&env).require_auth();
         let key = Key::Issuer(issuer);
         env.storage().persistent().set(&key, &approved);
-        env.storage().persistent().extend_ttl(&key, TTL_THRESHOLD, TTL_BUMP);
+        env.storage()
+            .persistent()
+            .extend_ttl(&key, TTL_THRESHOLD, TTL_BUMP);
         keep(&env);
     }
 
@@ -103,7 +105,9 @@ impl HoxoRwaFactory {
         let key = Key::Issuer(issuer);
         let approved = env.storage().persistent().get(&key).unwrap_or(false);
         if env.storage().persistent().has(&key) {
-            env.storage().persistent().extend_ttl(&key, TTL_THRESHOLD, TTL_BUMP);
+            env.storage()
+                .persistent()
+                .extend_ttl(&key, TTL_THRESHOLD, TTL_BUMP);
         }
         approved
     }
@@ -125,7 +129,9 @@ impl HoxoRwaFactory {
         let key = Key::Vault(vault);
         let info = env.storage().persistent().get(&key);
         if info.is_some() {
-            env.storage().persistent().extend_ttl(&key, TTL_THRESHOLD, TTL_BUMP);
+            env.storage()
+                .persistent()
+                .extend_ttl(&key, TTL_THRESHOLD, TTL_BUMP);
         }
         info
     }
@@ -151,7 +157,11 @@ impl HoxoRwaFactory {
             || metadata_uri.len() == 0
             || debt_cap <= 0
             || maturity <= env.ledger().timestamp()
-            || maturity > env.ledger().timestamp().saturating_add(MAX_MATURITY_SECONDS)
+            || maturity
+                > env
+                    .ledger()
+                    .timestamp()
+                    .saturating_add(MAX_MATURITY_SECONDS)
         {
             panic_with_error!(&env, FactoryError::InvalidParameters);
         }
@@ -164,13 +174,10 @@ impl HoxoRwaFactory {
             .instance()
             .get(&Key::CodeHash)
             .unwrap_or_else(|| panic_with_error!(&env, FactoryError::WasmNotConfigured));
-        let contract = env
-            .deployer()
-            .with_current_contract(salt)
-            .deploy_contract(
-                ContractExecutable::Wasm(hash),
-                (&issuer, &borrower, &liquidity_asset, &maturity, &debt_cap),
-            );
+        let contract = env.deployer().with_current_contract(salt).deploy_contract(
+            ContractExecutable::Wasm(hash),
+            (&issuer, &borrower, &liquidity_asset, &maturity, &debt_cap),
+        );
         let count: u32 = env.storage().instance().get(&Key::VaultCount).unwrap_or(0);
         let count = count
             .checked_add(1)
@@ -187,9 +194,15 @@ impl HoxoRwaFactory {
         };
         let key = Key::Vault(contract.clone());
         env.storage().persistent().set(&key, &info);
-        env.storage().persistent().extend_ttl(&key, TTL_THRESHOLD, TTL_BUMP);
+        env.storage()
+            .persistent()
+            .extend_ttl(&key, TTL_THRESHOLD, TTL_BUMP);
         keep(&env);
-        VaultDeployed { issuer, vault: contract.clone() }.publish(&env);
+        VaultDeployed {
+            issuer,
+            vault: contract.clone(),
+        }
+        .publish(&env);
         contract
     }
 }

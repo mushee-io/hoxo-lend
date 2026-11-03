@@ -47,18 +47,12 @@ jobs:
             soroban/rwa-factory
             soroban/lens
 
-      - name: Format Soroban crates for diagnostics
+      - name: Enforce Soroban rustfmt
         run: |
           set -euo pipefail
           for pkg in soroban soroban/oracle soroban/rate-model soroban/rwa soroban/market soroban/rwa-factory soroban/lens; do
-            cargo fmt --manifest-path "$pkg/Cargo.toml"
+            cargo fmt --manifest-path "$pkg/Cargo.toml" --check
           done
-
-      - name: Show Rust formatting differences
-        run: |
-          git diff --check
-          git diff --stat -- soroban/
-          git diff -- soroban/
 
       - name: Execute Soroban contract tests
         run: |

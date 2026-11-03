@@ -105,7 +105,9 @@ fn lender_shares(env: &Env, user: &Address) -> i128 {
     let key = Key::LenderShares(user.clone());
     let value = env.storage().persistent().get(&key).unwrap_or(0);
     if env.storage().persistent().has(&key) {
-        env.storage().persistent().extend_ttl(&key, TTL_THRESHOLD, TTL_BUMP);
+        env.storage()
+            .persistent()
+            .extend_ttl(&key, TTL_THRESHOLD, TTL_BUMP);
     }
     value
 }
@@ -113,7 +115,9 @@ fn lender_shares(env: &Env, user: &Address) -> i128 {
 fn save_lender_shares(env: &Env, user: &Address, shares: i128) {
     let key = Key::LenderShares(user.clone());
     env.storage().persistent().set(&key, &shares);
-    env.storage().persistent().extend_ttl(&key, TTL_THRESHOLD, TTL_BUMP);
+    env.storage()
+        .persistent()
+        .extend_ttl(&key, TTL_THRESHOLD, TTL_BUMP);
 }
 
 fn accrue(env: &Env) {
@@ -184,7 +188,9 @@ impl HoxoRwaVault {
         owner(&env).require_auth();
         let key = Key::Allowlisted(lender);
         env.storage().persistent().set(&key, &allowed);
-        env.storage().persistent().extend_ttl(&key, TTL_THRESHOLD, TTL_BUMP);
+        env.storage()
+            .persistent()
+            .extend_ttl(&key, TTL_THRESHOLD, TTL_BUMP);
         keep(&env);
     }
 
@@ -256,12 +262,20 @@ impl HoxoRwaVault {
         }
         let next = safe(&env, lender_shares(&env, &lender).checked_add(minted));
         let next_total = safe(&env, total_shares.checked_add(minted));
-        token::Client::new(&env, &asset(&env))
-            .transfer(&lender, &env.current_contract_address(), &amount);
+        token::Client::new(&env, &asset(&env)).transfer(
+            &lender,
+            &env.current_contract_address(),
+            &amount,
+        );
         save_lender_shares(&env, &lender, next);
         env.storage().instance().set(&Key::Shares, &next_total);
         keep(&env);
-        Credited { actor: lender, amount, action: 1 }.publish(&env);
+        Credited {
+            actor: lender,
+            amount,
+            action: 1,
+        }
+        .publish(&env);
     }
 
     pub fn borrow(env: Env, borrower: Address, amount: i128) {
@@ -292,10 +306,18 @@ impl HoxoRwaVault {
         let principal = safe(&env, get_i(&env, Key::Principal).checked_add(amount));
         env.storage().instance().set(&Key::Debt, &debt);
         env.storage().instance().set(&Key::Principal, &principal);
-        token::Client::new(&env, &asset(&env))
-            .transfer(&env.current_contract_address(), &borrower, &amount);
+        token::Client::new(&env, &asset(&env)).transfer(
+            &env.current_contract_address(),
+            &borrower,
+            &amount,
+        );
         keep(&env);
-        Credited { actor: borrower, amount, action: 2 }.publish(&env);
+        Credited {
+            actor: borrower,
+            amount,
+            action: 2,
+        }
+        .publish(&env);
     }
 
     pub fn repay(env: Env, payer: Address, amount: i128) -> i128 {
@@ -316,14 +338,22 @@ impl HoxoRwaVault {
         } else {
             0
         };
-        token::Client::new(&env, &asset(&env))
-            .transfer(&payer, &env.current_contract_address(), &paid);
+        token::Client::new(&env, &asset(&env)).transfer(
+            &payer,
+            &env.current_contract_address(),
+            &paid,
+        );
         env.storage().instance().set(&Key::Debt, &(debt - paid));
         env.storage()
             .instance()
             .set(&Key::Principal, &(principal - repaid_principal));
         keep(&env);
-        Credited { actor: payer, amount: paid, action: 3 }.publish(&env);
+        Credited {
+            actor: payer,
+            amount: paid,
+            action: 3,
+        }
+        .publish(&env);
         paid
     }
 
@@ -352,11 +382,21 @@ impl HoxoRwaVault {
             panic_with_error!(&env, VaultError::InsufficientShares);
         }
         save_lender_shares(&env, &lender, current - burned);
-        env.storage().instance().set(&Key::Shares, &(total_shares - burned));
-        token::Client::new(&env, &asset(&env))
-            .transfer(&env.current_contract_address(), &lender, &amount);
+        env.storage()
+            .instance()
+            .set(&Key::Shares, &(total_shares - burned));
+        token::Client::new(&env, &asset(&env)).transfer(
+            &env.current_contract_address(),
+            &lender,
+            &amount,
+        );
         keep(&env);
-        Credited { actor: lender, amount, action: 4 }.publish(&env);
+        Credited {
+            actor: lender,
+            amount,
+            action: 4,
+        }
+        .publish(&env);
     }
 
     pub fn declare_default(env: Env) {

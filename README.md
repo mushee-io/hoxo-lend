@@ -4,13 +4,13 @@
 
 This is the independent Stellar-only successor to the KUB Chain Maddeth design. The original [Maddeth repository](https://github.com/mushee-io/Maddeth) is untouched. Its full code snapshot is retained under `legacy/maddeth-kub/` strictly for design, accounting, test and product-reference purposes — **nothing in that directory is deployable as Stellar Soroban code**.
 
-## Current status — foundation, NOT public lending
+## Current status — deployed and paused on Stellar Testnet
 
-- Stellar Testnet configuration and an honest read-only website.
-- A Soroban Rust single-asset **custody-vault prototype** with deposits, withdrawals, per-user principal, administrator pause and authorization checks.
-- Supply/withdrawals are only implemented at contract-prototype level. No production deployment or audit is claimed.
-- **Borrow, repay, accrued interest, oracle-based collateral checks, liquidations, multi-asset markets, RWA credit, Freighter signing and the live application are not implemented.**
-- All user transaction controls intentionally remain disabled, and all TVL, APR and wallet metrics are unavailable rather than invented.
+Seven native Soroban contract instances were deployed and verified on 3 November 2026: lending market, custody vault, oracle, interest-rate model, isolated RWA vault, RWA issuer factory and read-only lens. Contract IDs and the successful verification run are recorded in [config/stellar-testnet.json](config/stellar-testnet.json). [On-chain deployment evidence](https://github.com/mushee-io/hoxo-lend/actions/runs/41691876395).
+
+**No public lending is enabled.** All money-moving contract instances are paused, the frontend remains read-only, and no APY, TVL, asset balances or trade volume are claimed. The isolated market uses a throwaway HXTEST asset, not Circle USDC. No public XLM/USDC credit markets are active.
+
+**Administrator:** This proof deployment used an ephemeral CI identity. Its secret was not saved, so the deployed admin-controlled contracts cannot be reopened by a team-controlled wallet. A new, properly governed and verified deployment is required before accepting Testnet user funds, plus a formal security/risk review and wallet-signed transaction acceptance.
 
 For porting order, risk gates and the feature-by-feature mapping from Maddeth see [docs/PORTING_PLAN.md](docs/PORTING_PLAN.md).
 
@@ -22,7 +22,7 @@ The Hoxo Lend app preserves separate Dashboard, XLM/USDC Markets, Supply/Borrow,
 
 Run `python3 -m http.server 8080` at the repository root, then open `http://localhost:8080/` or `http://localhost:8080/app/`.
 
-The optional RPC health-check button only calls Stellar Testnet `getHealth` and cannot sign or send transactions.
+The website displays genuine Testnet contract IDs and a read-only RPC health check. It cannot sign or send lending transactions.
 
 ## Soroban contract (prototype)
 
@@ -34,7 +34,7 @@ Install a current Rust toolchain and Stellar CLI compatible with the `soroban-sd
 
 The Stellar CLI is the supported way to build deployable Wasm for `wasm32v1-none`. **Do not deploy with real funds**. Check the live Testnet protocol version and SDK compatibility before the first deployment. The Testnet Protocol 30 upgrade is scheduled for 3 November 2026; SDK/XDR compatibility must be verified.
 
-A deployable contract ID is deliberately **not** provided. There is no mainnet release.
+Verified Stellar Testnet contract IDs are recorded in the repository's network registry. There is no mainnet release.
 
 ## Network
 

@@ -22,3 +22,7 @@ Hoxo Lend is **experimental Stellar Testnet software** and is **not production-r
 6. Only then consider an opt-in public beta. Mainnet requires a separate formal go/no-go review.
 
 Never commit secrets. To report a security issue, contact the repository maintainers privately; do not disclose exploit details in public issues.
+
+## Verified Testnet deployment (3 November 2026)
+
+Seven Soroban contract instances have been deployed and verified on Stellar **Testnet**, with all funds-moving contracts paused. See [`config/stellar-testnet.json`](config/stellar-testnet.json) and [deployment run](https://github.com/mushee-io/hoxo-lend/actions/runs/41691876395). The deployment administrator was an ephemeral CI identity whose secret was not retained; re-deploy under secured team ownership before testing public transactions. This is not mainnet readiness, a verified USDC listing, a completed audit, or authorization to accept public deposits.

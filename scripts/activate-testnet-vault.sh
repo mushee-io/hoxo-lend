@@ -3,11 +3,28 @@
 # are NEVER included in the repo, CI outputs, or website.
 set -euo pipefail
 umask 077
-: "$GITHUB_WORKSPACE" "$RUNNER_TEMP" "$GITHUB_RUN_ID" "$HOXO_ADMIN_PUBLIC_KEY" "$HOXO_CONFIRM_TESTNET_ONLY"
-ADMIN="$HOXO_ADMIN_PUBLIC_KEY"
-[[ "$ADMIN" =~ ^G[A-Z2-7]{55}$ ]] || { echo "A public Stellar G-address is required"; exit 1; }
-[[ "$HOXO_CONFIRM_TESTNET_ONLY" == "DEPLOY_XLM_TESTNET_VAULT" ]] || { echo "Missing explicit Testnet confirmation"; exit 1; }
+: "$GITHUB_WORKSPACE" "$RUNNER_TEMP" "$GITHUB_RUN_ID"
 WORK="$GITHUB_WORKSPACE"
+ADMIN="$HOXO_ADMIN_PUBLIC_KEY"
+ACK="$HOXO_CONFIRM_TESTNET_ONLY"
+# A user-authorized change to this explicit public-only config can also trigger
+# a GitHub Actions deployment; no operator secret is ever committed.
+if [[ -z "$ADMIN" && -f "$WORK/config/testnet-activation-request.json" ]]; then
+  ADMIN="$(python3 - "$WORK/config/testnet-activation-request.json" <<'PY'
+import json,sys
+with open(sys.argv[1]) as f: j=json.load(f)
+print(j.get("adminPublicKey",""))
+PY
+)"
+  ACK="$(python3 - "$WORK/config/testnet-activation-request.json" <<'PY'
+import json,sys
+with open(sys.argv[1]) as f: j=json.load(f)
+print(j.get("confirmation",""))
+PY
+)"
+fi
+[[ "$ADMIN" =~ ^G[A-Z2-7]{55}$ ]] || { echo "A public Stellar G-address is required"; exit 1; }
+[[ "$ACK" == "DEPLOY_XLM_TESTNET_VAULT" ]] || { echo "Missing explicit Testnet confirmation"; exit 1; }
 OUT="$WORK/out/controlled-pilot"
 mkdir -p "$OUT"
 export XDG_CONFIG_HOME="$RUNNER_TEMP/hoxo-identities"

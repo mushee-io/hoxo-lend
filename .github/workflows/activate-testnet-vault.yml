@@ -1,5 +1,9 @@
 name: Hoxo Lend — Deploy controlled XLM Testnet vault
 on:
+  push:
+    branches: [main]
+    paths:
+      - config/testnet-activation-request.json
   workflow_dispatch:
     inputs:
       admin_public_key:

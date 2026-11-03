@@ -52,5 +52,18 @@ jobs:
             echo "Browser bundle unchanged"
           else
             git commit -m "Publish compiled Stellar Testnet signing client [skip ci]"
-            git push origin HEAD:main
+            # Another deployment workflow may register fresh on-chain contract IDs
+            # while this bundle builds. Preserve those newer main commits.
+            for attempt in 1 2 3 4 5; do
+              git fetch origin main
+              git rebase origin/main
+              if git push origin HEAD:main; then
+                echo "Compiled Testnet wallet runtime published to main"
+                exit 0
+              fi
+              echo "Concurrent main update during publish attempt $attempt"
+              sleep 3
+            done
+            echo "Unable to publish wallet client after five safe retries" >&2
+            exit 1
           fi

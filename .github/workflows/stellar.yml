@@ -1,30 +1,61 @@
-name: Stellar foundation checks
+name: Stellar-native Soroban checks
+
 on:
   push:
-    branches: [main]
+    branches: [main, feature/soroban-full-protocol-port]
   pull_request:
+
 permissions:
   contents: read
+
 jobs:
-  frontend-and-contract:
+  stellar-contracts:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       CARGO_BUILD_JOBS: "2"
+    strategy:
+      fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Fail closed on wrong-network configuration
+
+      - name: Verify Stellar-only site and configuration
         run: |
+          set -euo pipefail
           node --check src/stellar.js
           node scripts/check-stellar.mjs
           git diff --check
-      - name: Rust toolchain
+
+      - name: Install Rust toolchain and formatter
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
-      - name: Rust formatting
-        run: cargo fmt --manifest-path soroban/Cargo.toml --check
-      - name: Rust tests
-        run: cargo test --manifest-path soroban/Cargo.toml
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            soroban
+            soroban/oracle
+            soroban/rate-model
+            soroban/rwa
+            soroban/market
+
+      - name: Enforce formatting for all active Soroban crates
+        run: |
+          set -euo pipefail
+          for pkg in soroban soroban/oracle soroban/rate-model soroban/rwa soroban/market; do
+            cargo fmt --manifest-path "$pkg/Cargo.toml" --check
+          done
+
+      - name: Execute Soroban contract tests
+        run: |
+          set -euo pipefail
+          for pkg in soroban soroban/oracle soroban/rate-model soroban/rwa soroban/market; do
+            echo "::group::Testing $pkg"
+            cargo test --manifest-path "$pkg/Cargo.toml"
+            echo "::endgroup::"
+          done

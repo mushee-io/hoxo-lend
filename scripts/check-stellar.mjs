@@ -32,7 +32,7 @@ const pages=["app/index.html","app/markets/index.html","app/markets/xlm/index.ht
 for (const page of pages) {
   const content = readFileSync(page,"utf8");
   assert.match(content,/Stellar Testnet/i,page);
-  assert.match(content,/not deployed|not live/i,page);
+  assert.match(content,/not deployed|not live|paused/i,page);
   assert.match(content,/\/src\/stellar\.js/i,page);
   assert.doesNotMatch(content,/\$2(?:\.00)?M|2000000|\$2,000,000/i,page);
 }

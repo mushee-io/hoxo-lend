@@ -397,6 +397,14 @@ function wireUi(){
   byId("hoxo-usdc-trustline")?.addEventListener("click",async()=>{
     try{await addUsdcTrustline();}catch(error){status(error.message||"USDC trustline failed","error");}
   });
+  byId("hoxo-supply-market")?.addEventListener("click",async()=>{
+    try{await signAction("market","supply",byId("market-supply-amount")?.value);}
+    catch(error){status(error.message||"Market supply rejected","error");}
+  });
+  byId("hoxo-withdraw-market")?.addEventListener("click",async()=>{
+    try{await signAction("market","withdraw_supply",byId("market-supply-amount")?.value);}
+    catch(error){status(error.message||"Market withdrawal rejected","error");}
+  });
   for(const method of ["deposit_collateral","withdraw_collateral"]){
     byId("hoxo-"+method.replaceAll("_","-"))?.addEventListener("click",async()=>{
       try{await signAction("market",method,byId("collateral-amount")?.value);}

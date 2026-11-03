@@ -13,7 +13,7 @@
 | Reserve factor, bad-debt absorption | Market-level solvency controls | First reserve/bad-debt path; accounting audit and insolvency simulation pending |
 | IsolatedRwaVault | `soroban/rwa/src/lib.rs` | Initial isolated Soroban RWA loan/vault port; high-risk and unaudited |
 | RwaVaultFactory: issuer registry/factory | \`soroban/rwa-factory/src/lib.rs\` | Native issuer allowlist and deterministic Wasm deployment prototype; full integration and audits pending |
-| MaddethLens | Native contract getters and read-only indexer | Pending |
+| MaddethLens | \`soroban/lens/src/lib.rs\` | First read-only Soroban aggregator, returning actual market state and account risk; RPC indexer not deployed |
 | WrappedTKUB | Stellar-native XLM via Stellar Asset Contract (SAC) | Pending native asset configuration; do not wrap or rename tKUB |
 | KUB test assets | Whitelisted Stellar Testnet asset contract IDs and verified issuers | No approved token IDs |
 | MetaMask EIP-1193 | Freighter + Stellar SDK transaction simulation/auth | Not integrated |

@@ -14,6 +14,7 @@ jobs:
     timeout-minutes: 45
     env:
       CARGO_BUILD_JOBS: "2"
+      CARGO_TARGET_DIR: /tmp/hoxo-lend-target
     strategy:
       fail-fast: false
     steps:
@@ -44,11 +45,12 @@ jobs:
             soroban/rwa
             soroban/market
             soroban/rwa-factory
+            soroban/lens
 
       - name: Format Soroban crates for diagnostics
         run: |
           set -euo pipefail
-          for pkg in soroban soroban/oracle soroban/rate-model soroban/rwa soroban/market soroban/rwa-factory; do
+          for pkg in soroban soroban/oracle soroban/rate-model soroban/rwa soroban/market soroban/rwa-factory soroban/lens; do
             cargo fmt --manifest-path "$pkg/Cargo.toml"
           done
 
@@ -61,7 +63,7 @@ jobs:
       - name: Execute Soroban contract tests
         run: |
           set -euo pipefail
-          for pkg in soroban soroban/oracle soroban/rate-model soroban/rwa soroban/market soroban/rwa-factory; do
+          for pkg in soroban soroban/oracle soroban/rate-model soroban/rwa soroban/market soroban/rwa-factory soroban/lens; do
             echo "::group::Testing $pkg"
             cargo test --manifest-path "$pkg/Cargo.toml"
             echo "::endgroup::"

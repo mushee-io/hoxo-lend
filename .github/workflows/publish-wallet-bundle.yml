@@ -1,0 +1,56 @@
+name: Publish static Freighter transaction client
+on:
+  push:
+    branches: [main]
+    paths:
+      - src/tx-live.js
+      - package.json
+      - .github/workflows/publish-wallet-bundle.yml
+      - vercel.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-hoxo-wallet-bundle
+  cancel-in-progress: false
+
+jobs:
+  bundle:
+    if: github.repository == 'mushee-io/hoxo-lend' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate source and build official Stellar/Freighter client
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check src/tx-live.js
+          node scripts/check-v2.mjs
+          node scripts/check-stellar.mjs
+          npm install --no-audit --no-fund
+          npm run test:frontend
+          npm run build
+          test -s dist/src/tx-live.bundle.js
+          cp dist/src/tx-live.bundle.js src/tx-live.bundle.js
+          node --check src/tx-live.bundle.js
+      - name: Commit immutable, compiled browser client for static hosting
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/tx-live.bundle.js
+          if git diff --cached --quiet; then
+            echo "Browser bundle unchanged"
+          else
+            git commit -m "Publish compiled Stellar Testnet signing client [skip ci]"
+            git push origin HEAD:main
+          fi

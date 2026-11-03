@@ -1,7 +1,8 @@
 {
   "trailingSlash": true,
   "cleanUrls": false,
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "installCommand": "npm install --no-audit --no-fund"
+  "framework": null,
+  "buildCommand": "",
+  "installCommand": "",
+  "outputDirectory": "."
 }

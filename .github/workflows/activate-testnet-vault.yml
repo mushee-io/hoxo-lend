@@ -1,4 +1,4 @@
-name: Hoxo Lend — Deploy controlled XLM Testnet vault
+name: Hoxo Lend — Deploy controlled XLM/USDC Testnet lending market
 on:
   push:
     branches: [main]
@@ -42,10 +42,12 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/check-stellar.mjs
-          cargo fmt --manifest-path soroban/Cargo.toml --check
-          cargo test --manifest-path soroban/Cargo.toml --quiet
-          stellar contract build --manifest-path soroban/Cargo.toml
-      - name: Deploy owner-controlled Stellar Testnet vault
+          for crate in soroban soroban/oracle soroban/rate-model soroban/market; do
+            cargo fmt --manifest-path "$crate/Cargo.toml" --check
+            cargo test --manifest-path "$crate/Cargo.toml" --quiet
+            stellar contract build --manifest-path "$crate/Cargo.toml"
+          done
+      - name: Deploy owned XLM vault, Circle USDC/XLM market, price oracle and rate controller
         shell: bash
         run: bash scripts/activate-testnet-vault.sh
       - name: Publish on-chain verification

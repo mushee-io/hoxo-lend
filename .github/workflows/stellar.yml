@@ -1,0 +1,30 @@
+name: Stellar foundation checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  frontend-and-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CARGO_BUILD_JOBS: "2"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Fail closed on wrong-network configuration
+        run: |
+          node --check src/stellar.js
+          node scripts/check-stellar.mjs
+          git diff --check
+      - name: Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: Rust formatting
+        run: cargo fmt --manifest-path soroban/Cargo.toml --check
+      - name: Rust tests
+        run: cargo test --manifest-path soroban/Cargo.toml

@@ -1,124 +1,46 @@
-# Maddeth
+# Hoxo Lend
 
-**Credit infrastructure for KUB.**
+**A Stellar-native lending protocol, adapted from the Maddeth product.**
 
-Maddeth is a KUB-native pooled lending protocol plus isolated RWA credit vault infrastructure, built testnet-first for KUB Chain.
+This is the independent Stellar-only successor to the KUB Chain Maddeth design. The original [Maddeth repository](https://github.com/mushee-io/Maddeth) is untouched. Its full code snapshot is retained under `legacy/maddeth-kub/` strictly for design, accounting, test and product-reference purposes — **nothing in that directory is deployable as Stellar Soroban code**.
 
-## Application structure
+## Current status — foundation, NOT public lending
 
-Maddeth now uses a real multi-page protocol architecture instead of embedding every product view into one marketing page.
+- Stellar Testnet configuration and an honest read-only website.
+- A Soroban Rust single-asset **custody-vault prototype** with deposits, withdrawals, per-user principal, administrator pause and authorization checks.
+- Supply/withdrawals are only implemented at contract-prototype level. No production deployment or audit is claimed.
+- **Borrow, repay, accrued interest, oracle-based collateral checks, liquidations, multi-asset markets, RWA credit, Freighter signing and the live application are not implemented.**
+- All user transaction controls intentionally remain disabled, and all TVL, APR and wallet metrics are unavailable rather than invented.
 
-- `/` — marketing homepage
-- `/app/` — application dashboard
-- `/app/markets/` — market directory
-- `/app/markets/wtkub/` — WtKUB market
-- `/app/markets/musdc/` — mUSDC market
-- `/app/markets/musdt/` — mUSDT market
-- `/app/borrow/` — supply / collateral / borrow / repay / withdraw terminal
-- `/app/rwa/` — isolated RWA credit vaults
-- `/app/portfolio/` — connected-wallet portfolio and health
-- `/app/protocol/` — protocol architecture and security model
-- `/docs/` — documentation
+For porting order, risk gates and the feature-by-feature mapping from Maddeth see [docs/PORTING_PLAN.md](docs/PORTING_PLAN.md).
 
-Wallet connection is part of the application shell, not a requirement for browsing the marketing homepage or public market data.
+## Local website
 
-## Current build
+Run `python3 -m http.server 8080` at the repository root, then open `http://localhost:8080/` or `http://localhost:8080/app/`.
 
-### Lending core
+The optional RPC health-check button only calls Stellar Testnet `getHealth` and cannot sign or send transactions.
 
-- indexed supplier and borrower accounting
-- utilisation-driven kinked interest-rate model
-- reserve factor and protocol reserve accounting
-- supply / withdraw / collateral enable / borrow / repay / repay-for
-- LTV and liquidation-threshold enforcement
-- partial liquidations with close factor and liquidation bonus
-- collateral-limited liquidation handling
-- bad-debt absorption with reserves-first loss handling
-- supply caps and borrow caps
-- per-market pause plus protocol-wide emergency pause
-- fail-closed price validation
+## Soroban contract (prototype)
 
-### RWA credit
+Install a current Rust toolchain and Stellar CLI compatible with the `soroban-sdk` version pinned in `soroban/Cargo.toml`. Then:
 
-- isolated vault factory
-- approved issuer registry
-- issuer-owned vaults
-- lender allowlists
-- independent debt caps and maturity
-- pause controls
-- explicit default declaration and cure lifecycle
-- debt-gated withdrawals
-- metadata URI registry
+    cargo test --manifest-path soroban/Cargo.toml
+    cargo fmt --manifest-path soroban/Cargo.toml --check
+    stellar contract build --manifest-path soroban/Cargo.toml
 
-### KUB integration
+The Stellar CLI is the supported way to build deployable Wasm for `wasm32v1-none`. **Do not deploy with real funds**. Check the live Testnet protocol version and SDK compatibility before the first deployment. The Testnet Protocol 30 upgrade is scheduled for 3 November 2026; SDK/XDR compatibility must be verified.
 
-- KUB Testnet chain ID `25925`
-- RPC `https://rpc-testnet.bitkubchain.io`
-- explorer `https://testnet.kubscan.com`
-- MetaMask-compatible EIP-1193 wallet connection
-- automatic KUB Testnet add/switch flow
-- native tKUB wallet balance
-- Wrapped tKUB test contract
-- Bitkub/BKC Oracle adapter with heartbeat, completed-round and timestamp checks
-- KUB Testnet Foundry deployment script
-- canonical deployment registry that stays empty until a real broadcast succeeds
+A deployable contract ID is deliberately **not** provided. There is no mainnet release.
 
-### Frontend integrity
+## Network
 
-The frontend is static and route-based. `scripts/check-frontend.mjs` enforces the required routes, CSP, dedicated market/borrow/RWA/portfolio/protocol pages, critical DOM bindings, RWA testnet disclosure and external-link hardening.
+- Network: Stellar **Testnet** only
+- Passphrase: `Test SDF Network ; September 2015`
+- Soroban RPC: https://soroban-testnet.stellar.org
+- Horizon: https://horizon-testnet.stellar.org
 
-GitHub Actions runs the frontend integrity check before `forge build` and `forge test -vvv`. The KUB Testnet deployment workflow runs the same frontend gate before any broadcast.
+No KUB endpoint, EVM signing or KUB-chain deployment workflow is active in the Hoxo Lend application.
 
-## Important
+## Security
 
-The smart contracts are **testnet software and are not production-ready**. They have not received an independent external audit.
-
-The UI intentionally refuses to invent live TVL, rates, balances or deployment state while canonical KUB Testnet contract addresses are unset. Sandbox values are clearly labelled simulated values and cannot submit transactions.
-
-Mintable `mUSDC` and `mUSDT` are test assets only and must never be represented as real stablecoins.
-
-The RWA demonstration vault does not represent a legally enforceable real-world asset.
-
-## Run locally
-
-```bash
-python -m http.server 8080
-```
-
-Open `http://localhost:8080/` for the homepage or `http://localhost:8080/app/` for the application.
-
-## Build and test
-
-```bash
-node scripts/check-frontend.mjs
-forge build
-forge test -vvv
-```
-
-## KUB Testnet deployment
-
-Use a dedicated testnet-only key. Never commit or paste a private key.
-
-```bash
-export KUB_TESTNET_RPC_URL="https://rpc-testnet.bitkubchain.io"
-export PRIVATE_KEY="<local testnet key>"
-
-forge script script/DeployKubTestnet.s.sol:DeployKubTestnet \
-  --rpc-url "$KUB_TESTNET_RPC_URL" \
-  -vvvv
-```
-
-After the dry run succeeds, add `--broadcast` to perform the real testnet deployment.
-
-See `docs/KUB_TESTNET_DEPLOYMENT.md` for the deployment and post-deployment checklist.
-
-## Repository layout
-
-- `contracts/` — lending, RWA, oracle and test helper contracts
-- `test/` — unit, fuzz and invariant tests
-- `script/` — KUB Testnet deployment and smoke test
-- `config/` — canonical network/deployment registry
-- `src/` — shared design system, app client and protocol client
-- `app/` — multi-page Maddeth application
-- `docs/` — public documentation and deployment documentation
-- `scripts/` — deployment registry and frontend integrity tooling
+See [SECURITY.md](SECURITY.md). The vault prototype is unaudited; until further testing and an external review, it must not custody funds even on mainnet.

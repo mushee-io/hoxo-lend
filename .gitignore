@@ -1,8 +1,6 @@
-out/
-cache/
-broadcast/
+target/
+soroban/target/
 .env
-.env.*
-!.env.example
-node_modules/
+.env.local
+*.wasm
 .DS_Store

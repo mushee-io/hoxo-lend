@@ -1,51 +1,24 @@
-# Maddeth Security
+# Hoxo Lend security and release controls
 
-Maddeth is currently testnet software. It has not completed an independent production audit and must not be represented as production-ready or used with real-value assets until audit, economic review, governance hardening and mainnet readiness work are complete.
+Hoxo Lend is **experimental Stellar Testnet software** and is **not production-ready**. No independent audit has been completed. No protocol TVL, borrowing, interest or liquidation data is advertised as live.
 
-## Current security controls
+## Controls
 
-- Two-step ownership transfers across privileged contracts.
-- Risk admin is pause-only in the lending pool; only the owner can reopen protocol or markets.
-- Irreversible bad-debt socialization is owner-only.
-- New markets require contract code, bounded decimals, a deployed rate model and conservative parameter ceilings.
-- Maximum listed-market count limits account-health loop growth.
-- Supply and borrow caps are enforced on-chain.
-- Withdrawals and repayments remain available during emergency pauses when account-health and liquidity rules permit.
-- Liquidations remain available during pauses.
-- Exact token balance-delta checks reject fee-on-transfer and unexpected rebasing behavior that could desynchronize accounting.
-- Oracle prices fail closed on invalid, future or stale timestamps.
-- Bitkub oracle feeds support optional normalized price circuit-breaker bounds.
-- Isolated RWA vaults use separate accounting, lender allowlists, immutable maturity/debt caps and locked economic terms after funding begins.
-- RWA vault creation can be paused globally at the factory.
-- Reentrancy guards cover state-changing asset movement paths.
-- Fuzz tests, invariant tests and security regression tests run in CI.
-- Slither high-severity static analysis runs separately in CI.
+- The public website is **read-only**; it cannot request a signature or broadcast a transaction.
+- Soroban vault contracts begin **paused** by default. Only an administrator can unpause them.
+- User deposits require explicit authorization and an amount greater than zero. Withdrawals require user authorization, sufficient recorded principal and a valid positive amount.
+- Contract asset addresses are provided at initialization and cannot be changed.
+- The initial vault tracks custody principal only; it has **no lending/borrow authority**, lending rates, liquidation mechanism, or oracle dependency.
+- Restore/TTL, asset issuer controls, decimal precision, fee/rent economics, upgrades, front-end transaction construction, threat modelling, fuzz/invariant tests and third-party audits remain required before enabling any deposit UI or borrowing flows.
+- Do not copy or reuse KUB deployments, EVM addresses, secret keys or MetaMask signing paths. The original EVM implementation exists under `legacy/` for reference only.
 
-## Emergency model
+## Release gates
 
-The pool owner controls market configuration, oracle replacement, reserve withdrawals, bad-debt absorption and unpausing. The risk admin can pause the whole protocol or individual markets but cannot reopen them. This is intentional so a compromised operational key can stop new risk without restoring activity or changing economic parameters.
+1. Verify SDK compatibility with the current Stellar Testnet protocol, especially Protocol 30.
+2. Build and test Wasm with Stellar CLI; add property, authorization, overflow and denial-of-service tests.
+3. Complete borrow/repay with a validated risk engine, price freshness, interest indices, caps and liquidation accounting.
+4. Verify Freighter preflight/sign/submit/confirm against actual Testnet contract IDs and explorer receipts.
+5. Independently review the smart contracts and close all critical findings.
+6. Only then consider an opt-in public beta. Mainnet requires a separate formal go/no-go review.
 
-During a pause, new supply and borrow activity is blocked. Repayment, liquidation and safe withdrawal paths are kept available so users and keepers can reduce risk.
-
-## KUB Testnet deployment rules
-
-The deployment workflow:
-
-1. Requires explicit manual confirmation.
-2. Refuses any RPC whose chain ID is not 25925.
-3. Requires a dedicated signer with at least 0.1 tKUB before broadcast.
-4. Builds and runs the complete Foundry suite before deployment.
-5. Validates bytecode at every critical deployed address.
-6. Executes an on-chain wrap/supply/borrow/repay/withdraw/unwrap smoke cycle.
-7. Writes deployment addresses into the canonical frontend registry only after the smoke cycle passes.
-8. Preserves Foundry broadcast receipts as workflow artifacts.
-
-Never commit or paste a funded private key into source code, issues, chats or logs. Use a dedicated KUB Testnet wallet and the `KUB_TESTNET_PRIVATE_KEY` GitHub environment secret.
-
-## Explicit testnet-only components
-
-`mUSDC`, `mUSDT`, WtKUB and the sample RWA vault are testnet development components. Mock stablecoins are mintable and do not represent real USDC/USDT claims. The sample RWA vault does not represent a legally enforceable real-world asset.
-
-## Before mainnet
-
-At minimum: independent smart-contract audit, economic-model review, oracle/depeg policy, multisig plus timelock ownership, incident-response runbook, deployment reproducibility checks, formalized upgrade policy, monitoring/alerting, keeper/liquidator reliability testing and legal review for any RWA product.
+Never commit secrets. To report a security issue, contact the repository maintainers privately; do not disclose exploit details in public issues.

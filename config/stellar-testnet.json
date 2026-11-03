@@ -6,9 +6,12 @@
   "explorer": "https://stellar.expert/explorer/testnet",
   "contracts": {
     "vault": null,
-    "pool": null,
+    "market": null,
     "oracle": null,
-    "riskEngine": null
+    "rateModel": null,
+    "lens": null,
+    "rwaFactory": null,
+    "rwaVault": null
   },
   "supportedAssets": [],
   "deploymentStatus": "not-deployed",

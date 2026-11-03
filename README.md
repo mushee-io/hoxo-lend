@@ -1,46 +1,53 @@
 # Hoxo Lend
 
-**A Stellar-native lending protocol, adapted from the Maddeth product.**
+**Stellar-native lending protocol.** Independent Soroban/Rust conversion of Maddeth's pooled credit and isolated RWA product.
 
-This is the independent Stellar-only successor to the KUB Chain Maddeth design. The original [Maddeth repository](https://github.com/mushee-io/Maddeth) is untouched. Its full code snapshot is retained under `legacy/maddeth-kub/` strictly for design, accounting, test and product-reference purposes — **nothing in that directory is deployable as Stellar Soroban code**.
+The [original Maddeth KUB repository](https://github.com/mushee-io/Maddeth) remains unchanged. Its original files are frozen as a reference-only snapshot in `legacy/maddeth-kub/`. No Solidity, EVM RPC or KUB/MetaMask address is used by the active Hoxo Lend frontend.
 
-## Current status — foundation, NOT public lending
+## Current source modules
 
-- Stellar Testnet configuration and an honest read-only website.
-- A Soroban Rust single-asset **custody-vault prototype** with deposits, withdrawals, per-user principal, administrator pause and authorization checks.
-- Supply/withdrawals are only implemented at contract-prototype level. No production deployment or audit is claimed.
-- **Borrow, repay, accrued interest, oracle-based collateral checks, liquidations, multi-asset markets, RWA credit, Freighter signing and the live application are not implemented.**
-- All user transaction controls intentionally remain disabled, and all TVL, APR and wallet metrics are unavailable rather than invented.
+| Soroban crate | Ported capabilities | Status |
+|---|---|---|
+| `soroban/` | Original principal-only custody/supply vault with pause | Research prototype |
+| `soroban/market/` | Isolated collateral/debt SAC market, supply shares, indexed borrow debt, rate accrual, deposits/withdrawals, LTV/health, repay-for, partial liquidation, reserve factor, bad-debt writeoff, guardian pause | Research prototype |
+| `soroban/rate-model/` | Kinked utilisation rate contract | Research prototype |
+| `soroban/oracle/` | Native permissioned Testnet price feed and timestamp | Research prototype; not independent pricing |
+| `soroban/rwa/` | Allowlisted fixed-rate isolated credit vault, loan cap, maturity, repayments, default/cure | Research prototype |
+| `soroban/rwa-factory/` | Issuer allowlist and deterministic Soroban vault deployment registry | Research prototype |
+| `soroban/lens/` | Read-only market, supply, debt and health aggregation | Research prototype |
 
-For porting order, risk gates and the feature-by-feature mapping from Maddeth see [docs/PORTING_PLAN.md](docs/PORTING_PLAN.md).
+**None of the above are independently audited, mainnet-safe or verified as deployed.** The canonical Stellar contract addresses are all `null`; the website does not sign or transmit transactions. No TVL, APY, contract receipts, issuer claims or asset availability are advertised as live.
 
-## Local website
+## Stellar-native application
 
-Run `python3 -m http.server 8080` at the repository root, then open `http://localhost:8080/` or `http://localhost:8080/app/`.
+The static website uses Stellar-only terms and separate sections: `/`, `/app/`, `/app/markets/`, `/app/borrow/`, `/app/portfolio/`, `/app/rwa/`, `/app/protocol/`, `/docs/`.
 
-The optional RPC health-check button only calls Stellar Testnet `getHealth` and cannot sign or send transactions.
-
-## Soroban contract (prototype)
-
-Install a current Rust toolchain and Stellar CLI compatible with the `soroban-sdk` version pinned in `soroban/Cargo.toml`. Then:
-
-    cargo test --manifest-path soroban/Cargo.toml
-    cargo fmt --manifest-path soroban/Cargo.toml --check
-    stellar contract build --manifest-path soroban/Cargo.toml
-
-The Stellar CLI is the supported way to build deployable Wasm for `wasm32v1-none`. **Do not deploy with real funds**. Check the live Testnet protocol version and SDK compatibility before the first deployment. The Testnet Protocol 30 upgrade is scheduled for 3 November 2026; SDK/XDR compatibility must be verified.
-
-A deployable contract ID is deliberately **not** provided. There is no mainnet release.
-
-## Network
-
-- Network: Stellar **Testnet** only
-- Passphrase: `Test SDF Network ; September 2015`
+- Stellar Testnet passphrase: `Test SDF Network ; September 2015`
 - Soroban RPC: https://soroban-testnet.stellar.org
 - Horizon: https://horizon-testnet.stellar.org
+- Stellar assets are used via their native Stellar Asset Contract (SAC) IDs.
+- Any Freighter signing / simulation and market registry enablement are explicitly gated until a real Testnet deployment and security review.
 
-No KUB endpoint, EVM signing or KUB-chain deployment workflow is active in the Hoxo Lend application.
+## Local checks
 
-## Security
+```sh
+python3 -m http.server 8080
+node scripts/check-stellar.mjs
 
-See [SECURITY.md](SECURITY.md). The vault prototype is unaudited; until further testing and an external review, it must not custody funds even on mainnet.
+for crate in soroban soroban/market soroban/oracle soroban/rate-model soroban/rwa soroban/rwa-factory soroban/lens; do
+  cargo fmt --manifest-path "$crate/Cargo.toml" --check
+  cargo test --manifest-path "$crate/Cargo.toml"
+done
+```
+
+Use an up-to-date Stellar CLI compatible with the pinned Soroban SDK and currently activated Testnet protocol for actual Wasm builds. Do not deploy before validating contract math, SAC authorization/transfer semantics, price feeds, storage TTL/restore behavior, cross-contract data types, test coverage and economic solvency.
+
+See [porting plan](docs/PORTING_PLAN.md), [module matrix](docs/CONVERSION_MATRIX.md) and [security gates](SECURITY.md).
+
+## Remaining gates
+
+- Exact Wasm compilation and SDK compatibility with the latest Stellar protocol.
+- Complete multi-market pooled collateral and RWA legal/issuer integration; isolated-pair market prototypes are not a pooled multi-market protocol.
+- Freighter wallet signed authorize/simulate/submit/receipt flows.
+- Extensive property/invariant/fuzz tests including stale prices, malicious assets, TTL expiry, insolvent positions and borrow/repay rounding.
+- Independent security audit and deployment evidence before enabling actual Testnet funds, then a separate formal mainnet go/no-go.

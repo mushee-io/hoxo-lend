@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f5f1eb">
+<meta name="description" content="Hoxo Lend native Stellar Testnet lending — Credit built for Stellar">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' https://soroban-testnet.stellar.org; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests">
+<title>Credit built for Stellar — Hoxo Lend</title><link rel="stylesheet" href="/src/stellar.css">
+</head>
+<body>
+<div class="topline">STELLAR TESTNET · SOROBAN DEVELOPMENT · NO VERIFIED HOXO LEND DEPLOYMENT</div>
+<header><a class="brand" href="/"><span class="brandmark" aria-hidden="true"></span>Hoxo Lend</a><nav aria-label="Main navigation"><a href="/">Home</a><a href="/app/">Dashboard</a><a href="/app/markets/">Markets</a><a href="/app/borrow/">Borrow</a><a href="/app/portfolio/">Portfolio</a><a href="/app/rwa/">RWA</a><a href="/app/protocol/">Protocol</a><a href="/docs/">Docs</a></nav></header>
+<main class="shell">
+<section class="app-hero"><div class="eyebrow">STELLAR SOROBAN ARCHITECTURE</div><h1>Credit built for Stellar</h1><p>Hoxo Lend reimplements Maddeth's lending primitives as Soroban Rust contracts; no KUB EVM contract is deployed by this product.</p><div class="actions"><a class="btn secondary" href="/app/">Back to dashboard</a><a class="btn secondary" href="/docs/">Read docs</a></div></section>
+<section class="panelgrid" aria-label="Protocol availability"><div class="metric"><span>NETWORK</span><strong>Stellar</strong><p>Testnet only</p></div><div class="metric"><span>ACTIVE CONTRACTS</span><strong>0</strong><p>No independently verified deployment</p></div><div class="metric"><span>LIVE APY / TVL</span><strong>—</strong><p>Not available</p></div><div class="metric"><span>TRANSACTIONS</span><strong>Off</strong><p>Pending verification and audits</p></div></section>
+<section class="workspace"><article class="panel"><div class="eyebrow">Native modules</div><h2>Modules</h2><div class="actions-grid"><div class="action"><h3>Lending market</h3><p>SAC transfers, supplier shares, indexed debt, collateral LTV, liquidation and reserves.</p></div>
+<div class="action"><h3>Rate model</h3><p>Kinked utilisation-based borrow rates in a native Soroban contract.</p></div>
+<div class="action"><h3>Price oracle</h3><p>Permissioned Testnet feed prototype. Freshness and validation checks fail closed.</p></div>
+<div class="action"><h3>RWA & analytics</h3><p>Isolated RWA vault, issuer factory and a read-only market/account lens.</p></div></div></article><aside class="panel"><div class="eyebrow">BUILD STATUS</div><h2>Not deployed</h2><p>Rust Soroban contracts are being implemented and tested. No Hoxo Lend contract addresses are present in the canonical registry, and nothing on this page can sign or broadcast a transaction.</p><p id="network-health" role="status">Stellar RPC has not been checked.</p><button id="check-network" class="btn secondary" type="button">Check Testnet RPC</button><p><strong>Security:</strong> independent audit pending</p><p><strong>Wallet:</strong> Freighter transaction integration pending</p></aside></section>
+</main>
+<footer><strong>Hoxo Lend</strong><p>Read-only Stellar Testnet developer preview. No public lending.</p><a href="https://github.com/mushee-io/hoxo-lend" target="_blank" rel="noopener noreferrer">Source</a></footer>
+<script src="/src/stellar.js" defer></script>
+</body></html>

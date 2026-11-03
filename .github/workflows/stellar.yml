@@ -43,11 +43,12 @@ jobs:
             soroban/rate-model
             soroban/rwa
             soroban/market
+            soroban/rwa-factory
 
       - name: Format Soroban crates for diagnostics
         run: |
           set -euo pipefail
-          for pkg in soroban soroban/oracle soroban/rate-model soroban/rwa soroban/market; do
+          for pkg in soroban soroban/oracle soroban/rate-model soroban/rwa soroban/market soroban/rwa-factory; do
             cargo fmt --manifest-path "$pkg/Cargo.toml"
           done
 
@@ -60,7 +61,7 @@ jobs:
       - name: Execute Soroban contract tests
         run: |
           set -euo pipefail
-          for pkg in soroban soroban/oracle soroban/rate-model soroban/rwa soroban/market; do
+          for pkg in soroban soroban/oracle soroban/rate-model soroban/rwa soroban/market soroban/rwa-factory; do
             echo "::group::Testing $pkg"
             cargo test --manifest-path "$pkg/Cargo.toml"
             echo "::endgroup::"

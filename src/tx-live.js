@@ -372,12 +372,13 @@ async function submitPrice(token){
     "Manual price feed: "+token+" = $"+value+
     ". This is user-entered TESTNET pricing, not a verified independent oracle. "+
     "Do you confirm the USD value is based on a recent independently checked source?"))return;
-  await submitExactTx({
+  const receipt=await submitExactTx({
     contractId:pilot.oracleContractId,method:"submit",
     args:[new Address(admin).toScVal(),new Address(tokenAddress).toScVal(),nativeToScVal(price,{type:"i128"})],
     amount:value+" USD per "+token,
     description:"Publish owner-signed manual TESTNET "+token+" oracle quote"
   });
+  if(receipt)await refreshButtons();
 }
 async function addUsdcTrustline(){
   if(pending)fail("Another transaction is pending.");

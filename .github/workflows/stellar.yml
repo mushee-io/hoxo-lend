@@ -4,7 +4,7 @@ on:
     branches: [main]
   pull_request:
 permissions:
-  contents: read
+  contents: write
 jobs:
   frontend-and-contract:
     runs-on: ubuntu-latest
@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          persist-credentials: false
+          persist-credentials: true
       - name: Fail closed on wrong-network configuration
         run: |
           node --check src/stellar.js
@@ -42,3 +42,21 @@ jobs:
         run: cargo fmt --manifest-path soroban/Cargo.toml --check
       - name: Rust tests
         run: cargo test --manifest-path soroban/Cargo.toml
+      - name: Publish static Freighter signing bundle
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s dist/src/tx-live.bundle.js
+          cp dist/src/tx-live.bundle.js src/tx-live.bundle.js
+          test -s src/tx-live.bundle.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/tx-live.bundle.js
+          if git diff --cached --quiet; then
+            echo "Freighter bundle already matches compiled version"
+            exit 0
+          fi
+          git commit -m "Publish verified Freighter signing bundle for Vercel static hosting [skip ci]"
+          git pull --rebase origin main
+          git push origin HEAD:main

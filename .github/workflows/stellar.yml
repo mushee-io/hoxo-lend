@@ -34,6 +34,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
+          targets: wasm32v1-none
 
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
@@ -60,5 +61,14 @@ jobs:
           for pkg in soroban soroban/oracle soroban/rate-model soroban/rwa soroban/market soroban/rwa-factory soroban/lens; do
             echo "::group::Testing $pkg"
             cargo test --manifest-path "$pkg/Cargo.toml"
+            echo "::endgroup::"
+          done
+
+      - name: Check Soroban Wasm target (not a deployable CLI build)
+        run: |
+          set -euo pipefail
+          for pkg in soroban soroban/oracle soroban/rate-model soroban/rwa soroban/market soroban/rwa-factory soroban/lens; do
+            echo "::group::Wasm target $pkg"
+            cargo check --release --target wasm32v1-none --manifest-path "$pkg/Cargo.toml"
             echo "::endgroup::"
           done
